@@ -1,4 +1,4 @@
 
 # Camada de apresentação
 
-## API principal substituta
+## Dashboard de monitoramento

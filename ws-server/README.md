@@ -1,2 +1,4 @@
+
 # Camada de infraestrutura
-### Servidor WebSocket
+
+## Servidor WebSocket
