@@ -1,28 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { Inject, Injectable } from '@nestjs/common';
+import { ViewProductDTO } from './dto/view-product.dto';
+import {
+  RedisClientType,
+  RedisFunctions,
+  RedisModules,
+  RedisScripts,
+} from 'redis';
 
 @Injectable()
 export class ProductsService {
-  create(createProductDto: CreateProductDto) {
-    createProductDto;
-    return 'This action adds a new product';
-  }
+  constructor(
+    @Inject('REDIS_CLIENT')
+    private readonly redis: RedisClientType<
+      RedisModules,
+      RedisFunctions,
+      RedisScripts
+    >,
+  ) {}
 
-  findAll() {
-    return `This action returns all products`;
-  }
+  async findOne(id: number): Promise<ViewProductDTO> {
+    const p = new ViewProductDTO();
+    p.id = String(id);
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
-  }
+    const r = await this.redis.get('mykey');
+    console.log('redis.get', r, typeof r);
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    updateProductDto;
-    return `This action updates a #${id} product`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+    return p;
   }
 }
