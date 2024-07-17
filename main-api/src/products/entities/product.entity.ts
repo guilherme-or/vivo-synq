@@ -5,14 +5,14 @@ import { SubscriptionType } from '../enums/subscription-type.enum';
 
 export class Product {
   id: string;
-  product_name: string;
-  product_type: ProductType;
-  subscription_type: SubscriptionType;
+  productName: string;
+  productType: ProductType;
+  subscriptionType: SubscriptionType;
   identifiers: string[];
   status: string;
-  start_date: Date;
-  end_date?: Date;
+  startDate: Date;
+  endDate?: Date;
   descriptions: Description[];
   prices: Price[];
-  sub_products: Product[];
+  subProducts: Product[];
 }

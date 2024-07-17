@@ -18,7 +18,7 @@ export class ProductsService {
     >,
   ) {}
 
-  async findOne(id: number): Promise<ViewProductDTO> {
+  async findById(id: number): Promise<ViewProductDTO> {
     const p = new ViewProductDTO();
     p.id = String(id);
 
