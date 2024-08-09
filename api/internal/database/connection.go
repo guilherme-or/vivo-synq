@@ -9,3 +9,9 @@ type SQLConn interface {
 	GetDatabase() *sql.DB
 	Close() error
 }
+
+type NoSQLConn interface {
+	Open() error
+	GetClient() interface{}
+	Close() error
+}
