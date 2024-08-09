@@ -18,7 +18,7 @@ func NewUserProductsHandler(c database.SQLConn) *UserProductsHandler {
 func (h *UserProductsHandler) GetUserProductsByID(w http.ResponseWriter, r *http.Request) {
 	userID := r.PathValue("user_id")
 	if userID == "" {
-		writeErr(w, ErrInvalidArgument)
+		writeAppErr(w, ErrInvalidArgument)
 		return
 	}
 
