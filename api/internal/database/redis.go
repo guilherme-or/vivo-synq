@@ -27,22 +27,32 @@ func NewRedisConnWithURL(url string) NoSQLConn {
 	}
 }
 
-func (r *RedisConn) Open() error {
-	r.client = redis.NewClient(&redis.Options{
-		Addr:      r.Addr,
-		Password:  r.Password,
-		DB:        r.DB,
+func (c *RedisConn) Open() error {
+	opt := &redis.Options{
+		Addr:      c.Addr,
+		Password:  c.Password,
+		DB:        c.DB,
 		TLSConfig: nil,
-	})
+	}
 
-	_, err := r.client.Ping().Result()
+	if c.URL != "" {
+		parsedURL, err := redis.ParseURL(c.URL)
+		if err != nil {
+			return err
+		}
+		opt = parsedURL
+	}
+
+	c.client = redis.NewClient(opt)
+
+	_, err := c.client.Ping().Result()
 	return err
 }
 
-func (r *RedisConn) GetClient() interface{} {
-	return r.client
+func (c *RedisConn) GetClient() interface{} {
+	return c.client
 }
 
-func (r *RedisConn) Close() error {
-	return r.client.Close()
+func (c *RedisConn) Close() error {
+	return c.client.Close()
 }

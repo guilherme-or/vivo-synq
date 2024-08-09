@@ -7,14 +7,13 @@ import (
 )
 
 type PostgreSQLConn struct {
-	DSN string
-	database  *sql.DB
+	DSN      string
+	database *sql.DB
 }
 
 func NewPostgreSQLConn(dsn string) SQLConn {
 	return &PostgreSQLConn{
 		DSN: dsn,
-		database:  nil,
 	}
 }
 
@@ -27,7 +26,6 @@ func (c *PostgreSQLConn) Open() error {
 	if err := db.Ping(); err != nil {
 		return err
 	}
-
 	c.database = db
 
 	return nil
