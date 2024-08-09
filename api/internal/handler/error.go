@@ -19,5 +19,5 @@ var (
 	ErrPermissionDenied = NewAppErr(403, "PERMISSION_DENIED", "Authenticated user has no permission to access the requested resource")
 	ErrNotFound         = NewAppErr(404, "NOT_FOUND", "A specified resource is not found")
 	ErrInternal         = NewAppErr(500, "INTERNAL", "Server error")
-	ErrTimeout          = NewAppErr(500, "TIMEOUT", "Request timeout exceeded. Try it later")
+	ErrTimeout          = NewAppErr(504, "TIMEOUT", "Request timeout exceeded. Try it later")
 )
