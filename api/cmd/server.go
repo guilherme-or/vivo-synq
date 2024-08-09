@@ -8,5 +8,5 @@ import (
 
 func main() {
 	h := handler.NewUserProductsHandler(nil)
-	http.HandleFunc("/users/{id}/products", h.GetUserProductsByID)
+	http.HandleFunc("/users/{user_id}/products", h.GetUserProductsByID)
 }

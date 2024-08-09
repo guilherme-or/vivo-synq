@@ -1,19 +1,26 @@
 package handler
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/guilherme-or/vivo-synq/api/internal/database"
 )
 
 type UserProductsHandler struct {
-	conn database.DatabaseConn
+	db *sql.DB
 }
 
-func NewUserProductsHandler(c database.DatabaseConn) *UserProductsHandler {
-	return &UserProductsHandler{conn: c}
+func NewUserProductsHandler(c database.SQLConn) *UserProductsHandler {
+	return &UserProductsHandler{db: c.GetDatabase()}
 }
 
 func (h *UserProductsHandler) GetUserProductsByID(w http.ResponseWriter, r *http.Request) {
+	userID := r.PathValue("user_id")
+	if userID == "" {
+		writeErr(w, ErrInvalidArgument)
+		return
+	}
+
 	w.WriteHeader(http.StatusNotImplemented)
 }

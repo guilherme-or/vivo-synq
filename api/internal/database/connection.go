@@ -1,10 +1,11 @@
 package database
 
-import "context"
+import (
+	"database/sql"
+)
 
-type DatabaseConn interface {
+type SQLConn interface {
 	Open() error
+	GetDatabase() *sql.DB
 	Close() error
-	GetClient() any
-	GetContext() context.Context
 }
