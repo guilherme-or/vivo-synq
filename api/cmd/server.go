@@ -1,15 +1,12 @@
 package main
 
 import (
-	"log"
 	"net/http"
+
+	"github.com/guilherme-or/vivo-synq/api/internal/handler"
 )
 
 func main() {
-	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
-
-		w.Write([]byte("Hello World"))
-	})
-
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	h := handler.NewUserProductsHandler(nil)
+	http.HandleFunc("/users/{id}/products", h.GetUserProductsByID)
 }
