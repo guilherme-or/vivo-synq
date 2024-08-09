@@ -1,5 +1,15 @@
 package main
 
+import (
+	"log"
+	"net/http"
+)
+
 func main() {
-	
+	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+
+		w.Write([]byte("Hello World"))
+	})
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
