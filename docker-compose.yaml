@@ -1,30 +1,38 @@
-version: '3.8'
-
 services:
   mysql:
     image: mysql:latest
     container_name: mysql_vivo_mock
     environment:
-      MYSQL_ROOT_PASSWORD: mysecretpw
-      MYSQL_DATABASE: mock_vivo
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: mysecretpw
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: vivo_mock
+      MYSQL_USER: vivo
+      MYSQL_PASSWORD: vivo
     ports:
       - "3306:3306"
+    networks:
+      - default
     volumes:
       - mysql_data:/var/lib/mysql
 
   nifi:
+    build:
+      context: ./nifi
     image: apache/nifi:latest
     container_name: nifi
     ports:
       - "8080:8080"
     environment:
       NIFI_WEB_HTTP_PORT: 8080
+    networks:
+      - default
     volumes:
       - nifi_data:/opt/nifi/nifi-current/logs
     depends_on:
       - mysql
+
+networks:
+  default:
+    driver: bridge
 
 volumes:
   mysql_data:
