@@ -3,10 +3,10 @@ services:
     image: mysql:latest
     container_name: mysql_vivo_mock
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: vivo_mock
-      MYSQL_USER: vivo
-      MYSQL_PASSWORD: vivo
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=vivo_mock
+      - MYSQL_USER=vivo
+      - MYSQL_PASSWORD=vivo
     ports:
       - "3306:3306"
     networks:
@@ -18,11 +18,13 @@ services:
     build:
       context: ./nifi
     image: apache/nifi:latest
-    container_name: nifi
+    container_name: nifi_etl
     ports:
-      - "8080:8080"
+      - "8443:8443"
     environment:
-      NIFI_WEB_HTTP_PORT: 8080
+      - SINGLE_USER_CREDENTIALS_USERNAME=nifi
+      - SINGLE_USER_CREDENTIALS_PASSWORD=nifi
+      - TZ=America/Sao_Paulo
     networks:
       - default
     volumes:
