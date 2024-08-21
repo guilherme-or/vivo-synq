@@ -1,34 +1,30 @@
 -- Modelagem do banco de dados principal para a integração de dados das fontes legadas
 
-CREATE DATABASE products;
+--Domain Oriented Databases
 
-CREATE TABLE mobile_products();
-CREATE TABLE landline_products();
-CREATE TABLE landline_products();
-CREATE TABLE internet_products();
-CREATE TABLE iptv_products();
-CREATE TABLE bundle_products();
-CREATE TABLE value_added_service_products();
-
-CREATE TABLE identifiers(
+CREATE TABLE mobileProducts(
     id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL,
-    identifier VARCHAR(255) NOT NULL
+    status VARCHAR(16) NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    subscription_type VARCHAR NOT NULL,
+    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
+    end_date TIMESTAMP NULL
 );
 
-CREATE TABLE descriptions(
+CREATE TABLE internetProducts(
     id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL,
-    text VARCHAR(255) NOT NULL,
-    url TEXT NOT NULL,
-    category VARCHAR(16) NOT NULL -- general, dates, promotion
+    status VARCHAR(16) NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    subscription_type VARCHAR NOT NULL,
+    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
+    end_date TIMESTAMP NULL
 );
 
-CREATE TABLE prices(
+CREATE TABLE bundleProducts(
     id SERIAL PRIMARY KEY,
-    product_id INTEGER NOT NULL,
-    description VARCHAR(255) NOT NULL,
-    type VARCHAR(16) NOT NULL, -- recurring, usage, one-off
-    recurring_period VARCHAR(16) NULL, -- daily, weekly, monthly, yearly, 1-4-days, 1-4-hours (regex=^(daily|weekly|monthly|yearly|\d{1,4}-(days|hours))$)
-    amount DECIMAL(10, 2) NOT NULL
+    status VARCHAR(16) NOT NULL,
+    product_name VARCHAR(255) NOT NULL,
+    subscription_type VARCHAR NOT NULL,
+    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
+    end_date TIMESTAMP NULL 
 );
