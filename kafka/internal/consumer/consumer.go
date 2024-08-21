@@ -1,6 +1,9 @@
 package consumer
 
-import "github.com/confluentinc/confluent-kafka-go/kafka"
+import (
+	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/guilherme-or/vivo-synq/kafka/internal/handler"
+)
 
 type AutoOffsetReset string
 
@@ -28,15 +31,15 @@ func New(server, groupID string, autoOffsetReset AutoOffsetReset) (*KafkaConsume
 	return &KafkaConsumer{Consumer: c}, nil
 }
 
-func (c *KafkaConsumer) Read(onMessage func(*kafka.Message), onFail func(*kafka.Message, error)) {
+func (c *KafkaConsumer) Read(handler *handler.KafkaMessageHandler) {
 	for {
 		msg, err := c.ReadMessage(-1)
 
 		if err != nil {
-			onFail(msg, err)
+			handler.OnFail(msg, err)
 			continue
 		}
 
-		onMessage(msg)
+		handler.OnMessage(msg)
 	}
 }

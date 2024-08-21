@@ -2,6 +2,7 @@ package connector
 
 import (
 	"bytes"
+	"errors"
 	"net/http"
 	"os"
 )
@@ -11,25 +12,27 @@ type Connector interface {
 }
 
 type DebeziumConnector struct {
-	URL string
-	Name string
+	URL      string
+	Name     string
 	JSONPath string
 }
 
 func New(toURL, connectorName, connectorPath string) Connector {
 	return &DebeziumConnector{
-		URL: toURL,
-		Name: connectorName,
+		URL:      toURL,
+		Name:     connectorName,
 		JSONPath: connectorPath,
 	}
 }
 
 func (c *DebeziumConnector) Register() error {
-	response, err := http.Get(c.URL + "/" + c.Name)
-
+	gr, err := http.Get(c.URL + "/" + c.Name)
 	if err != nil {
 		return err
-	} else if response.StatusCode == http.StatusOK {
+	}
+	defer gr.Body.Close()
+
+	if gr.StatusCode == http.StatusOK {
 		return nil
 	}
 
@@ -38,10 +41,14 @@ func (c *DebeziumConnector) Register() error {
 		return err
 	}
 
-	response, err = http.Post(c.URL, "application/json", bytes.NewBuffer(plan))
-
-	if err != nil || response.StatusCode != http.StatusOK {
+	pr, err := http.Post(c.URL, "application/json", bytes.NewBuffer(plan))
+	if err != nil {
 		return err
+	}
+	defer pr.Body.Close()
+
+	if pr.StatusCode != http.StatusCreated {
+		return errors.New("failed to register connector - " + http.StatusText(pr.StatusCode))
 	}
 
 	return nil

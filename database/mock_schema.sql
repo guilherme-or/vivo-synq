@@ -12,6 +12,8 @@ CREATE TABLE products(
     CONSTRAINT fk_parent_product_id FOREIGN KEY (parent_product_id) REFERENCES products(id)  
 );
 
+ALTER TABLE products REPLICA IDENTITY FULL;
+
 CREATE TABLE identifiers(
     id SERIAL PRIMARY KEY,
     product_id INTEGER NOT NULL,

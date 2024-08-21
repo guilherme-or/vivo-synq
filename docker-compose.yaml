@@ -1,76 +1,80 @@
 services:
-  mock:
-    image: debezium/postgres:13
+  postgres-mock:
+    image: debezium/postgres
+    container_name: vivo-synq_postgres-mock
+    networks:
+      - kafka-network
+    environment:
+      POSTGRES_PASSWORD: docker
+      POSTGRES_USER: docker
+      POSTGRES_DB: mock
     ports:
       - 5432:5432
-    environment:
-      - POSTGRES_USER=docker
-      - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=mockdb
-    networks:
-      - app-network
+    volumes:
+      - ./database/mock_schema.sql:/docker-entrypoint-initdb.d/mock_schema.sql
 
-  postgres:
-    image: debezium/postgres:13
-    ports:
-      - 5432:5432
-    environment:
-      - POSTGRES_USER=docker
-      - POSTGRES_PASSWORD=docker
-      - POSTGRES_DB=exampledb
+  postgres-integrated:
+    image: debezium/postgres
+    container_name: vivo-synq_postgres-integrated
     networks:
-      - app-network
+      - kafka-network
+    environment:
+      POSTGRES_PASSWORD: docker
+      POSTGRES_USER: docker
+      POSTGRES_DB: integrated
+    ports:
+      - 5433:5432
+    volumes:
+      - ./database/integrated_schema.sql:/docker-entrypoint-initdb.d/integrated_schema.sql
 
   zookeeper:
-    image: confluentinc/cp-zookeeper:5.5.3
+    image: confluentinc/cp-zookeeper:latest
+    container_name: vivo-synq_zookeeper
+    networks:
+      - kafka-network
+    ports:
+      - 2181:2181
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
-    networks:
-      - app-network
+      ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: confluentinc/cp-enterprise-kafka:5.5.3
-    depends_on: [zookeeper]
-    environment:
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-      KAFKA_BROKER_ID: 1
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_JMX_PORT: 9991
+    image: confluentinc/cp-kafka:latest
+    container_name: vivo-synq_kafka
+    networks:
+      - kafka-network
+    depends_on:
+      - zookeeper
     ports:
       - 9092:9092
-    networks:
-      - app-network
-
-  debezium:
-    image: debezium/connect:1.4
     environment:
-      BOOTSTRAP_SERVERS: kafka:9092
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG_CLEANER_DELETE_RETENTION_MS: 5000
+      KAFKA_BROKER_ID: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+
+  connector:
+    image: debezium/connect:latest
+    container_name: vivo-synq_connector
+    networks:
+      - kafka-network
+    ports:
+      - "8083:8083"
+    environment:
       GROUP_ID: 1
-      CONFIG_STORAGE_TOPIC: connect_configs
-      OFFSET_STORAGE_TOPIC: connect_offsets
-      KEY_CONVERTER: io.confluent.connect.avro.AvroConverter
-      VALUE_CONVERTER: io.confluent.connect.avro.AvroConverter
-      CONNECT_KEY_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: http://schema-registry:8081
-    depends_on: [kafka]
-    ports:
-      - 8083:8083
-    networks:
-      - app-network
-
-  schema-registry:
-    image: confluentinc/cp-schema-registry:5.5.3
-    environment:
-      - SCHEMA_REGISTRY_KAFKASTORE_CONNECTION_URL=zookeeper:2181
-      - SCHEMA_REGISTRY_HOST_NAME=schema-registry
-      - SCHEMA_REGISTRY_LISTENERS=http://schema-registry:8081,http://localhost:8081
-    ports:
-      - 8081:8081
-    depends_on: [zookeeper, kafka]
-    networks:
-      - app-network
+      CONFIG_STORAGE_TOPIC: my_connect_configs
+      OFFSET_STORAGE_TOPIC: my_connect_offsets
+      BOOTSTRAP_SERVERS: kafka:29092
+      CONNECT_TOPIC_CREATION_ENABLE: true
+    depends_on:
+      - zookeeper
+      - kafka
 
 networks:
-  app-network:
+  kafka-network:
+    name: vivo-synq_kafka-network
     driver: bridge
