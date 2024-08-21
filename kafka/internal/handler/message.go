@@ -31,14 +31,14 @@ func (h *KafkaMessageHandler) OnMessage(msg *kafka.Message) {
 	}
 
 	// JSON Pretty Print
-	jsonBytes, err := json.MarshalIndent(message, "", "    ")
-	if err != nil {
-		fmt.Printf("Error marshalling message: %v\n", err)
-		return
-	}
-	fmt.Println(string(jsonBytes))
+	// jsonBytes, err := json.MarshalIndent(message, "", "    ")
+	// if err != nil {
+	// 	fmt.Printf("Error marshalling message: %v\n", err)
+	// 	return
+	// }
+	// fmt.Println(string(jsonBytes))
 
-	if message.Payload.After.ID <= 0 || message.Payload.Before.ID <= 0 {
+	if message.Payload.After.ID <= 0 && message.Payload.Before.ID <= 0 {
 		fmt.Println("Product action: ERROR No ID value")
 		return
 	} else if message.Payload.After.ID > 0 && message.Payload.Before.ID > 0 {
@@ -58,13 +58,13 @@ func (h *KafkaMessageHandler) OnMessage(msg *kafka.Message) {
 	} else if message.Payload.After.ID <= 0 && message.Payload.Before.ID > 0 {
 		// Delete
 		fmt.Println("Product action: DELETE")
-		if err := h.productRepo.Delete(message.Payload.Before.ID); err != nil {
+		if err := h.productRepo.Delete(message.Payload.Before.ID, message.Payload.Before.ProductType); err != nil {
 			fmt.Printf("Error deleting product: %v\n", err)
 			return
 		}
 	}
 
-	fmt.Println("Product integrated successfully!")
+	fmt.Println("Product integrated successfully! Before ID: ", message.Payload.Before.ID, "After ID: ", message.Payload.After.ID)
 }
 
 func (h *KafkaMessageHandler) OnFail(msg *kafka.Message, err error) {

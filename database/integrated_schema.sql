@@ -6,8 +6,8 @@ CREATE TABLE mobile_products(
     status VARCHAR(16) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     subscription_type VARCHAR NOT NULL,
-    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
-    end_date TIMESTAMP NULL
+    start_date BIGINT NOT NULL,
+    end_date BIGINT NULL
 );
 
 CREATE TABLE internet_products(
@@ -15,8 +15,8 @@ CREATE TABLE internet_products(
     status VARCHAR(16) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     subscription_type VARCHAR NOT NULL,
-    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
-    end_date TIMESTAMP NULL
+    start_date BIGINT NOT NULL,
+    end_date BIGINT NULL
 );
 
 CREATE TABLE bundle_products(
@@ -24,8 +24,8 @@ CREATE TABLE bundle_products(
     status VARCHAR(16) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     subscription_type VARCHAR NOT NULL,
-    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
-    end_date TIMESTAMP NULL 
+    start_date BIGINT NOT NULL,
+    end_date BIGINT NULL 
 );
 
 CREATE TABLE landline_products(
@@ -33,8 +33,8 @@ CREATE TABLE landline_products(
     status VARCHAR(16) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     subscription_type VARCHAR NOT NULL,
-    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
-    end_date TIMESTAMP NULL 
+    start_date BIGINT NOT NULL,
+    end_date BIGINT NULL 
 );
 
 CREATE TABLE iptv_products(
@@ -42,8 +42,8 @@ CREATE TABLE iptv_products(
     status VARCHAR(16) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     subscription_type VARCHAR NOT NULL,
-    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
-    end_date TIMESTAMP NULL 
+    start_date BIGINT NOT NULL,
+    end_date BIGINT NULL 
 );
 
 CREATE TABLE value_added_service_products(
@@ -51,8 +51,8 @@ CREATE TABLE value_added_service_products(
     status VARCHAR(16) NOT NULL,
     product_name VARCHAR(255) NOT NULL,
     subscription_type VARCHAR NOT NULL,
-    start_date TIMESTAMP DEFAULT NOW() NOT NULL,
-    end_date TIMESTAMP NULL 
+    start_date BIGINT NOT NULL,
+    end_date BIGINT NULL 
 );
 
 CREATE TABLE identifiers(
