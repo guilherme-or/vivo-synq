@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/guilherme-or/vivo-synq/kafka/internal/entity"
-	"github.com/guilherme-or/vivo-synq/kafka/internal/repository"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
 )
 
 type KafkaMessageHandler struct {

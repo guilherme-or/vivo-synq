@@ -2,7 +2,7 @@ package consumer
 
 import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"github.com/guilherme-or/vivo-synq/kafka/internal/handler"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/handler"
 )
 
 type AutoOffsetReset string

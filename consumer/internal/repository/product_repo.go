@@ -1,6 +1,6 @@
 package repository
 
-import "github.com/guilherme-or/vivo-synq/kafka/internal/entity"
+import "github.com/guilherme-or/vivo-synq/consumer/internal/entity"
 
 type ProductRepository interface {
 	Insert(p *entity.Product) error

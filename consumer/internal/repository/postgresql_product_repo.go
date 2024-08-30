@@ -3,8 +3,8 @@ package repository
 import (
 	"database/sql"
 
-	"github.com/guilherme-or/vivo-synq/kafka/internal/database"
-	"github.com/guilherme-or/vivo-synq/kafka/internal/entity"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
 )
 
 const queryInsertProduct = "(id, status, product_name, subscription_type, start_date, end_date) VALUES ($1, $2, $3, $4, $5, $6);"
