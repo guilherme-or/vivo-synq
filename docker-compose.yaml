@@ -13,20 +13,6 @@ services:
     volumes:
       - ./database/mock_schema.sql:/docker-entrypoint-initdb.d/mock_schema.sql
 
-  postgres-integrated:
-    image: debezium/postgres
-    container_name: vivo-synq_postgres-integrated
-    networks:
-      - kafka-network
-    environment:
-      POSTGRES_PASSWORD: docker
-      POSTGRES_USER: docker
-      POSTGRES_DB: integrated
-    ports:
-      - 5433:5432
-    volumes:
-      - ./database/integrated_schema.sql:/docker-entrypoint-initdb.d/integrated_schema.sql
-
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     container_name: vivo-synq_zookeeper

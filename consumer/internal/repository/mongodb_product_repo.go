@@ -11,8 +11,6 @@ import (
 )
 
 const DatabaseName = "vivo-synq"
-const UsersCollection = "user_products"
-const ProductsCollection = "user_products"
 const UserProductsCollection = "user_products"
 
 var ErrNoResult = errors.New("nenhuma linha foi alterada nessa transação")
