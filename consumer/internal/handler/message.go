@@ -33,12 +33,12 @@ func (h *KafkaMessageHandler) OnMessage(msg *kafka.Message) {
 	}
 
 	// JSON Pretty Print
-	// jsonBytes, err := json.MarshalIndent(message, "", "    ")
-	// if err != nil {
-	// 	fmt.Printf("Error marshalling message: %v\n", err)
-	// 	return
-	// }
-	// fmt.Println(string(jsonBytes))
+	jsonBytes, err := json.MarshalIndent(string(msg.Value), "", "    ")
+	if err != nil {
+		fmt.Printf("Error marshalling message: %v\n", err)
+		return
+	}
+	fmt.Println(string(jsonBytes))
 
 	afterID := message.Payload.After.ID
 	beforeID := message.Payload.Before.ID

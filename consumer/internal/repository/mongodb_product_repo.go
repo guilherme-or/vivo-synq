@@ -10,8 +10,10 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const DatabaseName = "vivo-synq"
-const UserProductsCollection = "user_products"
+const (
+	DatabaseName           = "vivo-synq"
+	UserProductsCollection = "user_products"
+)
 
 var ErrNoResult = errors.New("nenhuma linha foi alterada nessa transação")
 
