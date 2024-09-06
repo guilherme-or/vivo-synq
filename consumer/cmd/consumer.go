@@ -42,19 +42,32 @@ func main() {
 	log.Println("Consumer subscribed. Starting to read messages...")
 
 	// Database connection instance
-	conn := database.NewMongoDBConn(os.Getenv("NOSQL_URI"))
-	// conn := database.NewPostgreSQLConn(os.Getenv("SQL_URI"))
-	if err := conn.Open(); err != nil {
-		panic(err)
-	}
-	defer conn.Close()
+	sqlConn, noSqlConn := databaseConnection()
+	defer sqlConn.Close()
+	defer noSqlConn.Close()
 
 	// Repository and Handler instance
-	repo := repository.NewMongoDBProductRepository(conn.(*database.MongoDBConn))
+	// repo := repository.NewMongoDBProductRepository(conn.(*database.MongoDBConn))
 	// repo := repository.NewPostgreSQLProductRepository(conn.(*database.PostgreSQLConn))
+	repo := repository.NewMixedProductRepository(sqlConn.(*database.PostgreSQLConn), noSqlConn.(*database.MongoDBConn))
 	h := handler.NewKafkaMessageHandler(repo)
 	log.Println("Message handler created with database repository...")
 
 	cs.Read(h)
 	fmt.Scan()
+}
+
+func databaseConnection() (database.SQLConn, database.NoSQLConn) {
+	// Database connection instance
+	sqlConn := database.NewPostgreSQLConn(os.Getenv("SQL_URI"))
+	if err := sqlConn.Open(); err != nil {
+		panic(err)
+	}
+
+	noSqlConn := database.NewMongoDBConn(os.Getenv("NOSQL_URI"))
+	if err := noSqlConn.Open(); err != nil {
+		panic(err)
+	}
+
+	return sqlConn, noSqlConn
 }
