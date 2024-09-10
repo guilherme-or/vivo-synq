@@ -13,6 +13,16 @@ type KafkaMessage struct {
 	Payload struct {
 		After  entity.Product `json:"after"`
 		Before entity.Product `json:"before"`
+		Source struct {
+			Version   string `json:"version"`
+			Connector string `json:"connector"`
+			Name      string `json:"name"`
+			TimeInMS  int64  `json:"ts_ms"`
+			Database  string `json:"db"`
+			Schema    string `json:"schema"`
+			Table     string `json:"table"`
+		} `json:"source"`
+		Transaction bool `json:"transaction"`
 	} `json:"payload"`
 }
 
@@ -33,12 +43,12 @@ func (h *KafkaMessageHandler) OnMessage(msg *kafka.Message) {
 	}
 
 	// JSON Pretty Print
-	jsonBytes, err := json.MarshalIndent(string(msg.Value), "", "    ")
-	if err != nil {
-		fmt.Printf("Error marshalling message: %v\n", err)
-		return
-	}
-	fmt.Println(string(jsonBytes))
+	// jsonBytes, err := json.MarshalIndent(string(msg.Value), "", "    ")
+	// if err != nil {
+	// 	fmt.Printf("Error marshalling message: %v\n", err)
+	// 	return
+	// }
+	// fmt.Println(string(jsonBytes))
 
 	afterID := message.Payload.After.ID
 	beforeID := message.Payload.Before.ID
