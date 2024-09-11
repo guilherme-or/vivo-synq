@@ -46,6 +46,16 @@ services:
       - zookeeper
       - kafka
 
+  redis-cache:
+    image: redis:latest
+    container_name: vivo-synq_redis-cache
+    networks:
+      - kafka-network
+    ports:
+      - 6379:6379
+    env_file:
+      - ./env/redis.env
+
 networks:
   kafka-network:
     name: vivo-synq_kafka-network
