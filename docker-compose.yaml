@@ -3,7 +3,7 @@ services:
     image: debezium/postgres
     container_name: vivo-synq_postgres-mock
     networks:
-      - kafka-network
+      - vivo-synq_network
     env_file:
       - ./env/mock.env
     ports:
@@ -15,7 +15,7 @@ services:
     image: confluentinc/cp-zookeeper:latest
     container_name: vivo-synq_zookeeper
     networks:
-      - kafka-network
+      - vivo-synq_network
     ports:
       - 2181:2181
     env_file:
@@ -25,7 +25,7 @@ services:
     image: confluentinc/cp-kafka:latest
     container_name: vivo-synq_kafka
     networks:
-      - kafka-network
+      - vivo-synq_network
     depends_on:
       - zookeeper
     ports:
@@ -37,7 +37,7 @@ services:
     image: debezium/connect:latest
     container_name: vivo-synq_connector
     networks:
-      - kafka-network
+      - vivo-synq_network
     ports:
       - "8083:8083"
     env_file:
@@ -49,14 +49,17 @@ services:
   redis-cache:
     image: redis:latest
     container_name: vivo-synq_redis-cache
+    volumes:
+      - ./database/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
     networks:
-      - kafka-network
+      - vivo-synq_network
     ports:
       - 6379:6379
     env_file:
       - ./env/redis.env
 
 networks:
-  kafka-network:
-    name: vivo-synq_kafka-network
+  vivo-synq_network:
+    name: vivo-synq_network
     driver: bridge

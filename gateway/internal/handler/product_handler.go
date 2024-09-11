@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 	"github.com/guilherme-or/vivo-synq/gateway/internal/repository"
 )
 
@@ -15,9 +15,11 @@ func NewProductHandler(productRepository repository.ProductRepository) *ProductH
 	return &ProductHandler{productRepository: productRepository}
 }
 
-func (h *ProductHandler) FindUserProducts(ctx *gin.Context) {
+func (h *ProductHandler) FindUserProducts(ctx *fiber.Ctx) error {
 	// Implementação da busca de produtos de um usuário
 	// 1 - FindInCache -> SaveInCache
 	// 2 - Find -> SaveInCache
-	ctx.Status(http.StatusNotImplemented)
+	return ctx.Status(http.StatusNotImplemented).JSON(fiber.Map{
+		"message": "not implemented",
+	})
 }

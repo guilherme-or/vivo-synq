@@ -11,7 +11,7 @@ type MixedProductRepository struct {
 	mongoDBClient *mongo.Client
 }
 
-func NewSearchProductRepository(redisConn *database.RedisConn, mongoDBConn *database.MongoDBConn) ProductRepository {
+func NewMixedProductRepository(mongoDBConn *database.MongoDBConn, redisConn *database.RedisConn) ProductRepository {
 	return &MixedProductRepository{
 		redisClient:   redisConn.GetClient().(*redis.Client),
 		mongoDBClient: mongoDBConn.GetClient().(*mongo.Client),
