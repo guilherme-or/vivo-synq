@@ -1,10 +1,16 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/go-redis/redis"
 	"github.com/guilherme-or/vivo-synq/gateway/internal/database"
 	"go.mongodb.org/mongo-driver/mongo"
 )
+
+// Tolerância de 15 minutos na memória. Valor imutável
+// considerado como aceitável pela empresa parceira (Vivo)
+const KeyExpTime = time.Minute * 15
 
 type MixedProductRepository struct {
 	redisClient   *redis.Client
