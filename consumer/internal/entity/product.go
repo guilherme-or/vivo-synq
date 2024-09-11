@@ -10,6 +10,7 @@ type Product struct {
 	EndDate          int64          `json:"end_date" bson:"end_date"`
 	UserID           int            `json:"user_id" bson:"user_id"`
 	ParentProductID  *int           `json:"parent_product_id,omitempty" bson:"parent_product_id"`
+	SubProducts      *[]Product     `json:"sub_products,omitempty" bson:"sub_products"`
 	Tags             *[]string      `json:"tags,omitempty" bson:"tags"`
 	Identifiers      *[]string      `json:"identifiers,omitempty" bson:"identifiers"`
 	Descriptions     *[]Description `json:"descriptions,omitempty" bson:"descriptions"`

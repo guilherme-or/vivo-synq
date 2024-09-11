@@ -24,6 +24,13 @@ CREATE TABLE products(
 
 ALTER TABLE products REPLICA IDENTITY FULL;
 
+CREATE TABLE tags(
+    id SERIAL PRIMARY KEY,
+    product_id INTEGER NOT NULL,
+    tag VARCHAR(64) NOT NULL,
+    CONSTRAINT fk_tag_product_id FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
 CREATE TABLE identifiers(
     id SERIAL PRIMARY KEY,
     user_id INTEGER,
@@ -51,6 +58,104 @@ CREATE TABLE prices(
     amount DECIMAL(10, 2) NOT NULL,
     CONSTRAINT fk_price_product_id FOREIGN KEY (product_id) REFERENCES products(id)  
 );
+
+
+-- Procedure para busca do produto completo
+
+CREATE OR REPLACE FUNCTION get_complete_product(param_product_id INT)
+RETURNS JSON AS $$
+DECLARE
+  product_data JSON;
+BEGIN
+  -- Consulta do produto principal
+  WITH RECURSIVE sub_products AS (
+    -- Primeiro nível: produto principal
+    SELECT
+      p.id,
+      p.status,
+      p.product_name,
+      p.product_type,
+      p.subscription_type,
+      EXTRACT(EPOCH FROM p.start_date) AS start_date,
+      EXTRACT(EPOCH FROM p.end_date) AS end_date,
+      p.user_id,
+      p.parent_product_id
+    FROM products p
+    WHERE p.id = param_product_id
+
+    UNION ALL
+
+    -- Subprodutos: busca recursiva
+    SELECT
+      p.id,
+      p.status,
+      p.product_name,
+      p.product_type,
+      p.subscription_type,
+      EXTRACT(EPOCH FROM p.start_date) AS start_date,
+      EXTRACT(EPOCH FROM p.end_date) AS end_date,
+      p.user_id,
+      p.parent_product_id
+    FROM products p
+    INNER JOIN sub_products sp ON p.parent_product_id = sp.id
+  )
+
+  -- Seleciona o produto principal e subprodutos com identificadores, descrições e preços
+  SELECT json_build_object(
+    'id', sp.id,
+    'status', sp.status,
+    'product_name', sp.product_name,
+    'product_type', sp.product_type,
+    'subscription_type', sp.subscription_type,
+    'start_date', sp.start_date,
+    'end_date', sp.end_date,
+    'user_id', sp.user_id,
+    'parent_product_id', sp.parent_product_id,
+
+    -- Tags
+    'tags', (SELECT json_agg(t.tag)
+                    FROM tags t
+                    WHERE t.product_id = sp.id),
+
+    -- Identificadores
+    'identifiers', (SELECT json_agg(i.identifier)
+                    FROM identifiers i
+                    WHERE i.product_id = sp.id),
+
+    -- Descrições
+    'descriptions', (SELECT json_agg(json_build_object('text', d.text, 'url', d.url, 'category', d.category))
+                     FROM descriptions d
+                     WHERE d.product_id = sp.id),
+
+    -- Preços
+    'prices', (SELECT json_agg(json_build_object('description', pr.description, 'type', pr.type, 'recurring_period', pr.recurring_period, 'amount', pr.amount))
+               FROM prices pr
+               WHERE pr.product_id = sp.id),
+
+    -- SubProdutos: chamada recursiva
+    'sub_products', (SELECT json_agg(json_build_object(
+                          'id', p.id,
+                          'status', p.status,
+                          'product_name', p.product_name,
+                          'product_type', p.product_type,
+                          'subscription_type', p.subscription_type,
+                          'start_date', EXTRACT(EPOCH FROM p.start_date),
+                          'end_date', EXTRACT(EPOCH FROM p.end_date),
+                          'user_id', p.user_id,
+                          'parent_product_id', p.parent_product_id,
+                          'tags', (SELECT json_agg(t.tag) FROM tags t WHERE t.product_id = p.id),
+                          'identifiers', (SELECT json_agg(i.identifier) FROM identifiers i WHERE i.product_id = p.id),
+                          'descriptions', (SELECT json_agg(json_build_object('text', d.text, 'url', d.url, 'category', d.category)) FROM descriptions d WHERE d.product_id = p.id),
+                          'prices', (SELECT json_agg(json_build_object('description', pr.description, 'type', pr.type, 'recurring_period', pr.recurring_period, 'amount', pr.amount)) FROM prices pr WHERE pr.product_id = p.id)
+                      ))
+                      FROM products p WHERE p.parent_product_id = sp.id)
+  ) INTO product_data
+  FROM sub_products sp
+  WHERE sp.parent_product_id IS NULL; -- Para garantir que o produto principal seja retornado no nível mais alto
+
+  RETURN product_data;
+END;
+$$ LANGUAGE plpgsql;
 
 
 -- Inserção de dados para teste
@@ -139,6 +244,46 @@ INSERT INTO products (status, product_name, product_type, subscription_type, sta
 ('active', 'Internet 500Mbps', 'internet', 'postpaid', '2024-05-01 17:00:00', NULL, 1, 35),
 ('active', 'Mobile Plan Plus', 'mobile', 'control', '2024-06-01 18:00:00', NULL, 2, 36),
 ('active', 'Bundle Plan Premium', 'bundle', 'postpaid', '2024-07-01 19:00:00', NULL, 3, 37);
+
+INSERT INTO tags (product_id, tag) VALUES
+(1, 'Special Sale'),
+(2, 'June Promotion'),
+(3, 'Shared'),
+(4, 'Use Now Pay After'),
+(5, 'Family Plan'),
+(6, 'Youth Offer'),
+(7, 'Business Bundle'),
+(8, 'Limited Time Offer'),
+(9, 'Exclusive Deal'),
+(10, 'Premium Service'),
+(11, 'Special Bundle'),
+(12, 'Extra Features'),
+(13, 'Ultimate Package'),
+(14, 'Value for Money'),
+(15, 'Flexible Plan'),
+(16, 'Enhanced Performance'),
+(17, 'Advanced Features'),
+(18, 'Customizable Options'),
+(19, 'High-Quality Service'),
+(20, 'Innovative Solution'),
+(21, 'Efficient Performance'),
+(22, 'Affordable Price'),
+(23, 'Convenient Plan'),
+(24, 'Versatile Package'),
+(25, 'Reliable Connectivity'),
+(26, 'User-Friendly Interface'),
+(27, 'Seamless Integration'),
+(28, 'Exceptional Customer Support'),
+(29, 'Cutting-Edge Technology'),
+(30, 'Streamlined Workflow'),
+(31, 'Enhanced Security'),
+(32, 'Scalable Solution'),
+(33, 'Robust Infrastructure'),
+(34, 'Effortless Management'),
+(35, 'Optimized Performance'),
+(36, 'Tailored Solution'),
+(37, 'Inclusive Features');
+
 
 INSERT INTO identifiers (user_id, product_id, identifier) VALUES
 (1, 1, 'ID-123456'),

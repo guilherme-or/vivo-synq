@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"strconv"
-	"strings"
+	"encoding/json"
+	"fmt"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
@@ -13,21 +13,55 @@ import (
 )
 
 const (
-	queryGetProductInformation = `
-		SELECT 
-		    p.id, p.status, p.product_name, p.product_type, p.subscription_type, 
-		    EXTRACT(EPOCH FROM p.start_date) AS start_date, 
-		    EXTRACT(EPOCH FROM p.end_date) AS end_date,
-		    p.user_id, p.parent_product_id, 
-		    array_agg(DISTINCT i.identifier) AS identifiers,
-		    array_agg(DISTINCT d.text || '|' || d.url || '|' || d.category) AS descriptions,
-		    array_agg(DISTINCT pr.description || '|' || pr.type || '|' || pr.recurring_period || '|' || pr.amount) AS prices
-		FROM products p
-		LEFT JOIN identifiers i ON p.id = i.product_id
-		LEFT JOIN descriptions d ON p.id = d.product_id
-		LEFT JOIN prices pr ON p.id = pr.product_id
-		WHERE p.id = $1
-		GROUP BY p.id;
+	// Query result example
+	// {
+	// 	"id":30,
+	// 	"status":"activating",
+	// 	"product_name":"IPTV Advanced",
+	// 	"product_type":"iptv",
+	// 	"subscription_type":"postpaid",
+	// 	"start_date":1730494800,
+	// 	"end_date":null,
+	// 	"user_id":7,
+	// 	"parent_product_id":null,
+	// 	"identifiers":[
+	// 	   "ID-012345",
+	// 	   "INT-500-555"
+	// 	],
+	// 	"descriptions":[
+	// 	   {
+	// 		  "text":"Landline Economy Plan with limited calls",
+	// 		  "url":"https://example.com/landline-economy",
+	// 		  "category":"dates"
+	// 	   }
+	// 	],
+	// 	"prices":[
+	// 	   {
+	// 		  "description":"Landline plan upgrade",
+	// 		  "type":"one-off",
+	// 		  "recurring_period":null,
+	// 		  "amount":9.99
+	// 	   }
+	// 	],
+	// 	"sub_products":[
+	// 	   {
+	// 		  "id":58,
+	// 		  "status":"cancelled",
+	// 		  "product_name":"IPTV Advanced",
+	// 		  "product_type":"iptv",
+	// 		  "subscription_type":"postpaid",
+	// 		  "start_date":1701432000,
+	// 		  "end_date":1704110400,
+	// 		  "user_id":11,
+	// 		  "parent_product_id":30,
+	// 		  "identifiers":null,
+	// 		  "descriptions":null,
+	// 		  "prices":null
+	// 	   }
+	// 	]
+	// }
+	queryGetCompleteProduct = `
+		SELECT * FROM get_complete_product($1)
 	`
 )
 
@@ -43,6 +77,9 @@ func NewMixedProductRepository(sqlConn *database.PostgreSQLConn, noSqlConn *data
 	noSqlClient := noSqlConn.GetClient().(*mongo.Client)
 	noSqlDB := noSqlClient.Database(DatabaseName)
 
+	// coll := noSqlDB.Collection(UserProductsCollection)
+	// coll.DeleteMany(context.Background(), bson.M{})
+
 	return &MixedProductRepository{
 		sqlDB:   sqlDB,
 		noSqlDB: noSqlDB,
@@ -50,75 +87,27 @@ func NewMixedProductRepository(sqlConn *database.PostgreSQLConn, noSqlConn *data
 	}
 }
 
-// TODO: Fix wrong string parsing to product information
-func (r *MixedProductRepository) getCompleteProduct(incomplete *entity.Product) *entity.Product {
-	// Executando a query
-	row := r.sqlDB.QueryRow(queryGetProductInformation, incomplete.ID)
-
-	// Variáveis para os resultados da query
-	var product entity.Product
-	var startDate, endDate sql.NullFloat64
-	var identifiers, descriptions, prices sql.NullString
-
-	// Scan dos resultados
-	err := row.Scan(
-		&product.ID,
-		&product.Status,
-		&product.ProductName,
-		&product.ProductType,
-		&product.SubscriptionType,
-		&startDate,
-		&endDate,
-		&product.UserID,
-		&product.ParentProductID,
-		&identifiers,
-		&descriptions,
-		&prices,
-	)
+func (r *MixedProductRepository) tryCompleteProduct(incomplete *entity.Product) *entity.Product {
+	rows, err := r.sqlDB.Query(queryGetCompleteProduct, incomplete.ID)
 	if err != nil {
 		return incomplete
 	}
+	defer rows.Close()
 
-	// Processando Identifiers
-	if identifiers.Valid {
-		idList := strings.Split(identifiers.String, ",")
-		product.Identifiers = &idList
+	// Processar os resultados em JSON ([]byte)
+	var jsonResult []byte
+	for rows.Next() {
+		if err := rows.Scan(&jsonResult); err != nil {
+			fmt.Printf("getCompleteProduct: %v", err)
+			return incomplete
+		}
 	}
 
-	// Processando Descriptions
-	if descriptions.Valid {
-		var descList []entity.Description
-		descEntries := strings.Split(descriptions.String, ",")
-		for _, entry := range descEntries {
-			parts := strings.Split(entry, "|")
-			if len(parts) == 3 {
-				descList = append(descList, entity.Description{
-					Text:     parts[0],
-					URL:      parts[1],
-					Category: parts[2],
-				})
-			}
-		}
-		product.Descriptions = &descList
-	}
-
-	// Processando Prices
-	if prices.Valid {
-		var priceList []entity.Price
-		priceEntries := strings.Split(prices.String, ",")
-		for _, entry := range priceEntries {
-			parts := strings.Split(entry, "|")
-			if len(parts) == 4 {
-				amount, _ := strconv.ParseFloat(parts[3], 64)
-				priceList = append(priceList, entity.Price{
-					Description:     parts[0],
-					Type:            parts[1],
-					RecurringPeriod: parts[2],
-					Amount:          amount,
-				})
-			}
-		}
-		product.Prices = &priceList
+	// Deserializar o JSON para a estrutura Product
+	var product entity.Product
+	if err := json.Unmarshal(jsonResult, &product); err != nil {
+		fmt.Printf("getCompleteProduct: %v", err)
+		return incomplete
 	}
 
 	return &product
@@ -126,7 +115,7 @@ func (r *MixedProductRepository) getCompleteProduct(incomplete *entity.Product) 
 
 // MongoDBRepository feature
 func (r *MixedProductRepository) Insert(p *entity.Product) error {
-	complete := r.getCompleteProduct(p)
+	complete := r.tryCompleteProduct(p)
 	coll := r.noSqlDB.Collection(UserProductsCollection)
 
 	res, err := coll.InsertOne(
@@ -147,7 +136,7 @@ func (r *MixedProductRepository) Insert(p *entity.Product) error {
 
 // MongoDBRepository feature
 func (r *MixedProductRepository) Update(id int, p *entity.Product) error {
-	complete := r.getCompleteProduct(p)
+	complete := r.tryCompleteProduct(p)
 	coll := r.noSqlDB.Collection(UserProductsCollection)
 
 	res, err := coll.ReplaceOne(r.ctx, bson.M{"id": id}, complete)
