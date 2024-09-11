@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
@@ -98,7 +97,6 @@ func (r *MixedProductRepository) tryCompleteProduct(incomplete *entity.Product) 
 	var jsonResult []byte
 	for rows.Next() {
 		if err := rows.Scan(&jsonResult); err != nil {
-			fmt.Printf("getCompleteProduct: %v", err)
 			return incomplete
 		}
 	}
@@ -106,7 +104,6 @@ func (r *MixedProductRepository) tryCompleteProduct(incomplete *entity.Product) 
 	// Deserializar o JSON para a estrutura Product
 	var product entity.Product
 	if err := json.Unmarshal(jsonResult, &product); err != nil {
-		fmt.Printf("getCompleteProduct: %v", err)
 		return incomplete
 	}
 
