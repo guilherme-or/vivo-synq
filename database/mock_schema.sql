@@ -16,7 +16,7 @@ CREATE TABLE products(
     subscription_type VARCHAR NOT NULL, -- prepaid, postpaid, control
     start_date TIMESTAMP DEFAULT NOW() NOT NULL,
     end_date TIMESTAMP NULL,
-    user_id INTEGER NOT NULL,
+    user_id INTEGER NULL,
     parent_product_id INTEGER NULL,
     CONSTRAINT fk_product_user_id FOREIGN KEY (user_id) REFERENCES users(id),
     CONSTRAINT fk_parent_product_id FOREIGN KEY (parent_product_id) REFERENCES products(id)
