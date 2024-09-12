@@ -123,12 +123,12 @@ BEGIN
                     WHERE i.product_id = sp.id),
 
     -- Descrições
-    'descriptions', (SELECT json_agg(json_build_object('text', d.text, 'url', d.url, 'category', d.category))
+    'descriptions', (SELECT json_agg(json_build_object('id', d.id, 'product_id', d.product_id, 'text', d.text, 'url', d.url, 'category', d.category))
                      FROM descriptions d
                      WHERE d.product_id = sp.id),
 
     -- Preços
-    'prices', (SELECT json_agg(json_build_object('description', pr.description, 'type', pr.type, 'recurring_period', pr.recurring_period, 'amount', pr.amount))
+    'prices', (SELECT json_agg(json_build_object('id', pr.id, 'product_id', pr.product_id, 'description', pr.description, 'type', pr.type, 'recurring_period', pr.recurring_period, 'amount', pr.amount))
                FROM prices pr
                WHERE pr.product_id = sp.id),
 
@@ -145,8 +145,8 @@ BEGIN
                           'parent_product_id', p.parent_product_id,
                           'tags', (SELECT json_agg(t.tag) FROM tags t WHERE t.product_id = p.id),
                           'identifiers', (SELECT json_agg(i.identifier) FROM identifiers i WHERE i.product_id = p.id),
-                          'descriptions', (SELECT json_agg(json_build_object('text', d.text, 'url', d.url, 'category', d.category)) FROM descriptions d WHERE d.product_id = p.id),
-                          'prices', (SELECT json_agg(json_build_object('description', pr.description, 'type', pr.type, 'recurring_period', pr.recurring_period, 'amount', pr.amount)) FROM prices pr WHERE pr.product_id = p.id)
+                          'descriptions', (SELECT json_agg(json_build_object('id', d.id, 'product_id', d.product_id, 'text', d.text, 'url', d.url, 'category', d.category)) FROM descriptions d WHERE d.product_id = p.id),
+                          'prices', (SELECT json_agg(json_build_object('id', pr.id, 'product_id', pr.product_id, 'description', pr.description, 'type', pr.type, 'recurring_period', pr.recurring_period, 'amount', pr.amount)) FROM prices pr WHERE pr.product_id = p.id)
                       ))
                       FROM products p WHERE p.parent_product_id = sp.id)
   ) INTO product_data

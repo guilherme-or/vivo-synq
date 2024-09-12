@@ -1,0 +1,492 @@
+openapi: 3.0.0
+tags:
+  - name: products
+    description: Operations available with products  by a user
+paths:
+  /users/{user_id}/products:
+    get:
+      description: List the products by a user
+      tags:
+        - products
+      operationId: listUserProducts
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      summary: Retrieve the productsby a user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              examples:
+                response:
+                  value:
+                    - id: 24523asfgas
+                      status: active
+                      product_name: Telefone móvel Prepago
+                      identifiers:
+                        - '+34689452000'
+                      product_type: mobile
+                      start_date: '2022-03-14T23:00:00+01:00'
+                      subscription_type: prepaid
+                      descriptions:
+                        - text: pré pago turbo
+                      
+                    - id: 24522345245sfgas
+                      status: active
+                      product_name: Vivo Total 700 Mega + Netflix
+                      product_type: bundle
+                      identifiers:
+                        - '+51939791073'
+                      start_date: '2024-03-14T23:00:00+01:00'
+                      sub_products:
+                        - id: 24523asfgaswtrwetr
+                          status: active
+                          product_name: Vivo pós 20GB
+                          identifiers:
+                            - '+51939791073'
+                          product_type: mobile
+                          start_date: '2024-03-14T23:00:00+01:00'
+                          descriptions:
+                            - text: Linha móvel com 20GB de franquia
+                          
+                        - id: 2452asfjdajfasfg
+                          status: active
+                          product_name: Netflix
+                          identifiers:
+                            - '+51939791073'
+                          product_type: value_add_service
+                          start_date: '2024-03-14T23:00:00+01:00'
+                        - id: 2euei2asfjdajfasfg
+                          status: active
+                          product_name: Internet 700 Mega
+                          identifiers:
+                            - '+51939791073'
+                          product_type: internet
+                          start_date: '2024-03-14T23:00:00+01:00'
+                          descriptions:
+                            - text: 'Vivo fibra 700 Mega'
+                            
+        '400':
+          headers:
+            x-correlator:
+              description: Correlation id for the different services
+              schema:
+                type: string
+          description: Problem with the client request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schema1'
+              examples:
+                response:
+                  value:
+                    code: INVALID_ARGUMENT
+                    message: Client specified an invalid argument, request body or query param
+        '403':
+          headers:
+            x-correlator:
+              description: Correlation id for the different services
+              schema:
+                type: string
+          description: Client does not have sufficient permission
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schema2'
+              examples:
+                response:
+                  value:
+                    code: PERMISSION_DENIED
+                    message: Authenticated user has no permission to access the requested resource
+        '404':
+          headers:
+            x-correlator:
+              description: Correlation id for the different services
+              schema:
+                type: string
+          description: Resource not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schema3'
+              examples:
+                response:
+                  value:
+                    code: NOT_FOUND
+                    message: A specified resource is not found
+        '500':
+          headers:
+            x-correlator:
+              description: Correlation id for the different services
+              schema:
+                type: string
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schema4'
+              examples:
+                response:
+                  value:
+                    code: INTERNAL
+                    message: Server error
+        '504':
+          headers:
+            x-correlator:
+              description: Correlation id for the different services
+              schema:
+                type: string
+          description: Request timeout exceeded. If it happens repeatedly, consider reducing the request complexity
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/schema5'
+              examples:
+                response:
+                  value:
+                    code: TIMEOUT
+                    message: Request timeout exceeded. Try it later
+      x-fp-status:
+        service: products-listUserProducts_v3
+        status: false
+      x-fp-security:
+        pi_scopes:
+          - products-user-read
+        purposes:
+          - customer-self-service
+info:
+  description: |-
+    Retorna os dados de posse de produtos de um cliente.
+
+    # Definições
+    Está api retorna os produtos contratados de um cliente. Na Vivo existem várias opções de produtos, dentre eles se destacam, a telefonia móvel 5G, a internet de fibra, a TV por assinatura, produtos de casa inteligente e muitos outros produtos de parceiros, como netflix, amazon prime, que podem ser contratados como um pacote pelo cliente.
+      
+      https://www.vivo.com.br/
+    
+  version: 1.0.0
+  title:  Products
+  termsOfService: https://www.vivo.com.br
+  contact:
+    name: 4th Platform Team
+servers:
+  - url: https://api.vivo.com.br/products/v1
+components:
+  parameters:
+    UserId:
+      name: user_id
+      in: path
+      required: true
+      description: |-
+        Identificador unico de um cliente.
+      x-fp-identifier: user_id
+      schema:
+        type: string
+    PhoneNumber:
+      name: phone_number
+      description: Linha telefônica de um cliente. formato 'E164 with +'.
+      in: path
+      required: true
+      x-fp-identifier: phone_number
+      schema:
+        type: string
+    Identifier:
+      name: identifier
+      in: query
+      description: Linha telefônica.
+      required: false
+      schema:
+        type: string
+    Status:
+      name: status
+      description: Status do produto.
+      in: query
+      required: false
+      schema:
+        type: string
+        enum:
+          - active
+          - activating
+          - suspended
+          - cancelled
+          - selected
+    ProductTypes:
+      name: product_types
+      description: |-
+        Tipo de um produto, exemplos:
+         - mobile representa uma linha telefônica móvel.
+         - landline: linha fixa.
+         - internet: fibra ótica.
+         - bundle: representa um conjunto de vários produtos (internet+móvel+tv por exemplo).
+         - value_added_service: Serviços digitais, como Netflix, amazon prime, Disney+, etc.
+      in: query
+      required: false
+      schema:
+        type: array
+        items:
+          type: string
+          enum:
+            - mobile
+            - landline
+            - internet
+            - iptv
+            - bundle
+            - value_added_service
+  schemas:
+    Product:
+      type: object
+      description: Modelo do produto
+      required:
+        - product_name
+        - product_type
+      properties:
+        product_name:
+          type: string
+          description: Nome comercial do produto.
+        product_type:
+          $ref: '#/components/schemas/ProductType'
+        descriptions:
+          $ref: '#/components/schemas/Descriptions'
+        subscription_type:
+          $ref: '#/components/schemas/SubscriptionType'
+        tags:
+          type: array
+          description: Tags de identificação do produto.
+          items:
+            type: string
+    SubscriptionType:
+      type: string
+      description: Tipo de assinatura vinculada no produto (prepaid, postpaid, etc)
+      default: postpaid
+      enum:
+        - prepaid
+        - postpaid
+        - control
+    ProductType:
+      type: string
+      description: |-
+        Tipos de produtos.
+      enum:
+        - mobile
+        - landline
+        - internet
+        - iptv
+        - bundle
+        - value_added_service
+    Products:
+      description: Object that models a  product
+      allOf:
+        - $ref: '#/components/schemas/Product'
+        - type: object
+          required:
+            - id
+            - start_date
+            - status
+            - identifiers
+          properties:
+            id:
+              type: string
+              description: Indetificador unico do produto.
+            status:
+              type: string
+              description: |-
+                Representa o estado do produto.
+                 - **'active'** produto é ativo e pronto para uso.
+                 - **'activating'** o produto foi contratado mas está em processo de ativação e criando os recursos necessários para ser utilizado pelo cliente.
+                 - **'suspended'** produto foi suspenso por falta de pagamento ou outro problema legal.
+                 - **'cancelled'** Produto foi cancelado pelo cliente. 
+              enum:
+                - active
+                - activating
+                - suspended
+                - cancelled
+            identifiers:
+              type: array
+              description: Lista de identificadores dos clientes associados ao produto, pode ser uma linha telefônica, um identificador de banda larga, linha fixa, ou em alguns casos até o CPF do cliente.
+              items:
+                type: string
+            start_date:
+              type: string
+              description: Data de contratação do produto , no formato ISO-8601.
+              format: date-time
+            end_date:
+              type: string
+              description: Data de término da assinatura do produto, no formato ISO-8601.
+              format: date-time
+            prices:
+              type: array
+              description: Lista de preços pagos pelo cliente.
+              items:
+                $ref: '#/components/schemas/Price'
+            sub_products:
+              type: array
+              description: Array of products objects. Only applies for product bundle
+              items:
+                $ref: '#/components/schemas/Product'
+    Description:
+      type: object
+      description: Informação detalhada do produto.
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          description: Texto com informações descritivas do produto.
+        url:
+          type: string
+          pattern: ^https?://.+$
+          description: HTTPS URL
+        category:
+          type: string
+          description: |-
+            Category of the description. This field is used to provide further info about displaying of the description text:
+             - 'general': Descrição comercial do produto, intruções de uso, dentre outras informações.
+             - 'dates': inforções sobre prazo de contratação e duração do produto.
+             - 'promotion': Descrição sobre a promoção do produto.
+          enum:
+            - general
+            - dates
+            - promotion
+    Descriptions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Description'
+    Price:
+      type: object
+      description: Informações sobre o preço pago pelo cliente no produto.
+      required:
+        - description
+        - type
+        - amount
+      properties:
+        description:
+          type: string
+          description: Descritivo do preço.
+        type:
+          type: string
+          description: |-
+            Type of the price.
+            - 'recurring' Preço cobrado recorrentemente, podendo ser de diversas formas, como diário, semanal, mensal, etc.
+            - 'usage' preço pago por consumo, como por exemplo 100gb de internet por R$ 100.
+            - 'one-shot' Pago apenas uma vez.
+          enum:
+            - recurring
+            - usage
+            - one-off
+          default: recurring
+        recurring_period:
+          type: string
+          description: |-
+            Período de cobrança recorrente.
+          pattern: ^(daily|weekly|monthly|yearly|\d{1,4}-(days|hours))$
+        amount:
+          description: Valor pago.
+          type: object
+          required:
+            - value
+            - currency
+          properties:
+            value:
+              type: number
+              format: float
+              multipleOf: 0.01
+              description: Amount value
+    schema1:
+      allOf:
+        - type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              enum:
+                - INVALID_ARGUMENT
+              default: INVALID_ARGUMENT
+              description: Client specified an invalid argument, request body or query param.
+        - type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: A human readable description of what the event represent
+    schema2:
+      allOf:
+        - type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              enum:
+                - PERMISSION_DENIED
+              default: PERMISSION_DENIED
+              description: Client does not have sufficient permissions to perform this action.
+        - type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: A human readable description of what the event represent
+    schema3:
+      allOf:
+        - type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              enum:
+                - NOT_FOUND
+              default: NOT_FOUND
+              description: The specified resource is not found
+        - type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: A human readable description of what the event represent
+    schema4:
+      allOf:
+        - type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              enum:
+                - INTERNAL
+              default: INTERNAL
+              description: Unknown server error.Typically a server bug.
+        - type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: A human readable description of what the event represent
+    schema5:
+      allOf:
+        - type: object
+          required:
+            - code
+          properties:
+            code:
+              type: string
+              enum:
+                - TIMEOUT
+              default: TIMEOUT
+              description: Request timeout exceeded
+        - type: object
+          required:
+            - message
+          properties:
+            message:
+              type: string
+              description: A human readable description of what the event represent
+    

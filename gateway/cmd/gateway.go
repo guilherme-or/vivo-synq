@@ -35,6 +35,8 @@ func main() {
 		StrictRouting: false,
 		ServerHeader:  "VivoSynq",
 		AppName:       "VivoSynq Main API",
+		GETOnly:       true,
+		
 	})
 
 	// Definição da rota principal
