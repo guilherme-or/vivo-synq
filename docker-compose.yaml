@@ -9,7 +9,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - ./database/mock_schema.sql:/docker-entrypoint-initdb.d/mock_schema.sql
+      - ./database/mock_dump.sql:/docker-entrypoint-initdb.d/mock_dump.sql
 
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
