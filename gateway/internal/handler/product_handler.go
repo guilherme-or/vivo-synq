@@ -23,6 +23,8 @@ func (h *ProductHandler) FindUserProducts(ctx *fiber.Ctx) error {
 	products, err := h.productRepository.FindInCache(userID)
 	if err != nil {
 		// 2 - FindInCache -> Error -> Find -> SaveInCache
+		log.Print("FindInCache Error: ", err)
+
 		products, err = h.productRepository.Find(userID)
 		if err != nil {
 			// 3 - FindInCache -> Error -> Find -> Error
@@ -30,11 +32,10 @@ func (h *ProductHandler) FindUserProducts(ctx *fiber.Ctx) error {
 			return ctx.Status(fiber.StatusNotFound).JSON(ErrNotFound)
 		}
 
-		log.Print("FindInCache Error: ", err)
+		if err := h.productRepository.SaveInCache(userID, products); err != nil {
+			log.Print("SaveInCache Error: ", err)
+		}
 	}
 
-	if err := h.productRepository.SaveInCache(userID, products); err != nil {
-		log.Print("SaveInCache Error: ", err)
-	}
 	return ctx.Status(fiber.StatusOK).JSON(products)
 }

@@ -10,7 +10,7 @@ services:
     ports:
       - "9090:9090"
     networks:
-      - dashboard-network
+      - vivo-synq_network
 
   grafana:
     image: grafana/grafana:latest
@@ -24,9 +24,9 @@ services:
     depends_on:
       - prometheus
     networks:
-      - dashboard-network
+      - vivo-synq_network
 
 networks:
-  dashboard-network:
-    name: dashboard-network
-    driver: bridge
+  vivo-synq_network:
+    name: vivo-synq_network
+    external: true
