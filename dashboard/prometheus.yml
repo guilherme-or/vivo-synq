@@ -15,3 +15,7 @@ scrape_configs:
     basic_auth:
       username: strix_adm
       password: 3JdIsikPWh2QhCXC
+
+  - job_name: redis
+    static_configs:
+      - targets: ['redis-exporter:9121']

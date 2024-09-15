@@ -19,7 +19,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 6,
   "links": [],
   "panels": [
     {
@@ -36,7 +35,11 @@
       "type": "row"
     },
     {
-      "datasource": {},
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
       "fieldConfig": {
         "defaults": {
           "decimals": 2,
@@ -61,7 +64,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 6,
+        "w": 7,
         "x": 0,
         "y": 1
       },
@@ -91,7 +94,7 @@
             "uid": "bdxsrhsw8mfi8d"
           },
           "disableTextWrap": false,
-          "editorMode": "code",
+          "editorMode": "builder",
           "expr": "sum(mongodb_uptimeMillis{job=\"mongodb-atlas\"})/(3000)",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -102,7 +105,7 @@
           "useBackend": false
         }
       ],
-      "title": "Uptime (horas)",
+      "title": "Uptime",
       "type": "stat"
     },
     {
@@ -127,14 +130,14 @@
               }
             ]
           },
-          "unit": "none"
+          "unit": "reqps"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 4,
-        "w": 7,
-        "x": 6,
+        "w": 6,
+        "x": 7,
         "y": 1
       },
       "id": 4,
@@ -163,8 +166,8 @@
             "uid": "bdxsrhsw8mfi8d"
           },
           "disableTextWrap": false,
-          "editorMode": "builder",
-          "expr": "sum(mongodb_network_numRequests{group_id=\"66d0d0d90623836d876bcc0a\"})",
+          "editorMode": "code",
+          "expr": "sum(rate(mongodb_network_numRequests{job=\"mongodb-atlas\"}[1m]))",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
           "instant": false,
@@ -206,7 +209,7 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
+        "w": 6,
         "x": 13,
         "y": 1
       },
@@ -274,8 +277,8 @@
       },
       "gridPos": {
         "h": 4,
-        "w": 4,
-        "x": 17,
+        "w": 5,
+        "x": 19,
         "y": 1
       },
       "id": 3,
@@ -317,6 +320,124 @@
       ],
       "title": "Registros atualizados/dia",
       "type": "stat"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "{__name__=\"redis_exporter_last_scrape_duration_seconds\", instance=\"redis-exporter:9121\", job=\"redis\"}"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "id": 20,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "disableTextWrap": false,
+          "editorMode": "builder",
+          "expr": "redis_exporter_last_scrape_duration_seconds{job=\"redis\"}",
+          "fullMetaSearch": false,
+          "includeNullMetadata": true,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A",
+          "useBackend": false
+        }
+      ],
+      "title": "Tempo de resposta",
+      "type": "timeseries"
     },
     {
       "datasource": {},
@@ -396,8 +517,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 13,
-        "x": 0,
+        "w": 12,
+        "x": 12,
         "y": 5
       },
       "id": 6,
@@ -995,6 +1116,6 @@
   "timezone": "browser",
   "title": "VivoSynq",
   "uid": "edxsgcgg7u8zkddasdas",
-  "version": 2,
+  "version": 4,
   "weekStart": ""
 }
