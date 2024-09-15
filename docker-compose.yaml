@@ -59,6 +59,18 @@ services:
     env_file:
       - ./env/redis.env
 
+  redis-exporter:
+    image: bitnami/redis-exporter:latest
+    container_name: dashboard-redis-exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis-cache:6379
+    depends_on:
+      - redis-cache
+    networks:
+      - vivo-synq_network
+
 networks:
   vivo-synq_network:
     name: vivo-synq_network
