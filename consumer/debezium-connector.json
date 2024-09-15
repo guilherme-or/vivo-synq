@@ -1,0 +1,14 @@
+{
+  "name": "vivo_synq-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "database.hostname": "postgres-mock",
+    "database.port": "5432",
+    "database.user": "docker",
+    "database.password": "docker",
+    "database.dbname": "mock",
+    "database.server.name": "postgres-mock",
+    "topic.prefix": "postgres",
+    "table.include.list": "public.products"
+  }
+}

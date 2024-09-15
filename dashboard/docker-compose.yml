@@ -1,0 +1,32 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: dashboard-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - --web.listen-address=0.0.0.0:9090
+    ports:
+      - "9090:9090"
+    networks:
+      - vivo-synq_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: dashboard-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning
+    env_file:
+      - ./grafana.env
+    depends_on:
+      - prometheus
+    networks:
+      - vivo-synq_network
+
+networks:
+  vivo-synq_network:
+    name: vivo-synq_network
+    external: true
