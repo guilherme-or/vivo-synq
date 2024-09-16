@@ -8,7 +8,7 @@ type Product struct {
 	SubscriptionType string         `json:"subscription_type" bson:"subscription_type"`
 	StartDate        int64          `json:"start_date" bson:"start_date"`
 	EndDate          int64          `json:"end_date" bson:"end_date"`
-	UserID           int            `json:"user_id" bson:"user_id"`
+	UserID           *int            `json:"user_id" bson:"user_id"`
 	ParentProductID  *int           `json:"parent_product_id,omitempty" bson:"parent_product_id"`
 	SubProducts      *[]Product     `json:"sub_products,omitempty" bson:"sub_products"`
 	Tags             *[]string      `json:"tags,omitempty" bson:"tags"`
