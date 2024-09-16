@@ -28,8 +28,8 @@ func NewMixedProductRepository(sqlConn *database.PostgreSQLConn, noSqlConn *data
 	noSqlClient := noSqlConn.GetClient().(*mongo.Client)
 	noSqlDB := noSqlClient.Database(DatabaseName)
 
-	// coll := noSqlDB.Collection(UserProductsCollection)
-	// coll.DeleteMany(context.Background(), bson.M{})
+	coll := noSqlDB.Collection(UserProductsCollection)
+	coll.DeleteMany(context.Background(), bson.M{})
 
 	return &MixedProductRepository{
 		sqlDB:   sqlDB,

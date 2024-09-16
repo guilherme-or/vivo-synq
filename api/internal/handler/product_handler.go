@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"os"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/guilherme-or/vivo-synq/api/internal/repository"
 )
+
+const customSecretHeader = "X-Secret"
 
 // Controlador de requisições dos produtos de um usuário
 type ProductHandler struct {
@@ -17,6 +20,13 @@ func NewProductHandler(productRepository repository.ProductRepository) *ProductH
 }
 
 func (h *ProductHandler) FindUserProducts(ctx *fiber.Ctx) error {
+	// Verificação de segurança da API por uma chave secreta
+	secret := ctx.Get(customSecretHeader)
+
+	if secret != os.Getenv("API_SECRET") {
+		return ctx.Status(fiber.StatusForbidden).JSON(ErrPermissionDenied)
+	}
+
 	userID := ctx.Params("user_id")
 
 	// 1 - FindInCache -> SaveInCache
