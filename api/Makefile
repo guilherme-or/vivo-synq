@@ -1,5 +1,5 @@
 build:
-	go build -o ./bin/gateway ./cmd/gateway.go
+	go build -o ./bin/api ./cmd/api.go
 
 run: build
-	./bin/gateway
+	./bin/api

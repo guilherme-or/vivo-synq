@@ -1,8 +1,15 @@
 import type { ProductOrError } from "./entity";
 
+const API_SECRET = "vivo-synq";
+
 async function findUserProducts(userID: number): Promise<ProductOrError> {
   const url = `http://localhost:8080/users/${userID}/products`;
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      "X-Secret": API_SECRET,
+    },
+  });
 
   let products: ProductOrError;
   products = await response.json();
