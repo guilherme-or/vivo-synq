@@ -18,8 +18,8 @@ CREATE TABLE products(
     end_date TIMESTAMP NULL,
     user_id INTEGER NULL,
     parent_product_id INTEGER NULL,
-    CONSTRAINT fk_product_user_id FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_parent_product_id FOREIGN KEY (parent_product_id) REFERENCES products(id)
+    CONSTRAINT fk_product_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_parent_product_id FOREIGN KEY (parent_product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 ALTER TABLE products REPLICA IDENTITY FULL;
@@ -28,7 +28,7 @@ CREATE TABLE tags(
     id SERIAL PRIMARY KEY,
     product_id INTEGER NOT NULL,
     tag VARCHAR(64) NOT NULL,
-    CONSTRAINT fk_tag_product_id FOREIGN KEY (product_id) REFERENCES products(id)
+    CONSTRAINT fk_tag_product_id FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 CREATE TABLE identifiers(
@@ -36,8 +36,8 @@ CREATE TABLE identifiers(
     user_id INTEGER,
     product_id INTEGER NOT NULL,
     identifier VARCHAR(255) NOT NULL,
-    CONSTRAINT fk_identifier_user_id FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_identifier_product_id FOREIGN KEY (product_id) REFERENCES products(id)
+    CONSTRAINT fk_identifier_user_id FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT fk_identifier_product_id FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 CREATE TABLE descriptions(
@@ -46,7 +46,7 @@ CREATE TABLE descriptions(
     text VARCHAR(255) NOT NULL,
     url TEXT NULL,
     category VARCHAR(16) NULL, -- general, dates, promotion
-    CONSTRAINT fk_description_product_id FOREIGN KEY (product_id) REFERENCES products(id)
+    CONSTRAINT fk_description_product_id FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 CREATE TABLE prices(
@@ -56,7 +56,7 @@ CREATE TABLE prices(
     type VARCHAR(16) NULL, -- recurring, usage, one-off
     recurring_period VARCHAR(32) NOT NULL, -- daily, weekly, monthly, yearly, 1-4-days, 1-4-hours (regex=^(daily|weekly|monthly|yearly|\d{1,4}-(days|hours))$)
     amount DECIMAL(10, 2) NULL,
-    CONSTRAINT fk_price_product_id FOREIGN KEY (product_id) REFERENCES products(id)  
+    CONSTRAINT fk_price_product_id FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
 );
 
 
