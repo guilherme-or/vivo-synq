@@ -72,6 +72,42 @@ services:
     networks:
       - vivo-synq_network
 
+  # consumer:
+  #   container_name: vivo-synq_consumer
+  #   build:
+  #     context: ./consumer
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - ./env/consumer.env
+  #   networks:
+  #     - vivo-synq_network
+  #   depends_on:
+  #     - postgres-mock
+  #     - zookeeper
+  #     - kafka
+  #     - connector
+  #     - redis-cache
+  #     - redis-exporter
+
+  api:
+    container_name: vivo-synq_api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./env/api.env
+    networks:
+      - vivo-synq_network
+    depends_on:
+      - postgres-mock
+      - zookeeper
+      - kafka
+      - connector
+      - redis-cache
+      - redis-exporter
+
 networks:
   vivo-synq_network:
     name: vivo-synq_network

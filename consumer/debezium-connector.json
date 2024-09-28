@@ -9,6 +9,6 @@
     "database.dbname": "mock",
     "database.server.name": "postgres-mock",
     "topic.prefix": "postgres",
-    "table.include.list": "public.products"
+    "schema.include.list": "public"
   }
 }

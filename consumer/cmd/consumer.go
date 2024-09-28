@@ -15,9 +15,10 @@ import (
 
 func main() {
 	// Environment variables
-	err := godotenv.Load(".env")
-	if err != nil {
-		panic("Error loading environment file (.env): " + err.Error())
+	if os.Getenv("CONNECTOR_URL") == "" {
+		if err := godotenv.Load(".env"); err != nil {
+			panic(err)
+		}
 	}
 
 	// Consumer instance
