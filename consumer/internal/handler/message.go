@@ -51,6 +51,22 @@ func (h *KafkaMessageHandler) OnMessage(msg *kafka.Message) {
 
 	// TODO: Check message after and before type (Product, Price, Identifier, Description, Tag)
 
+	if message.Payload.Source.Table == "product" {
+		fmt.Println("Product")
+		// productAfter := message.Payload.After.(*entity.Product)
+		// productBefore := message.Payload.Before.(*entity.Product)
+	} else if message.Payload.Source.Table == "price" {
+		fmt.Println("Price")
+	} else if message.Payload.Source.Table == "identifier" {
+		fmt.Println("Identifier")
+	} else if message.Payload.Source.Table == "description" {
+		fmt.Println("Description")
+	} else if message.Payload.Source.Table == "tag" {
+		fmt.Println("Tag")
+	} else {
+		fmt.Println("Unknown")
+	}
+
 	// afterID := message.Payload.After.ID
 	// beforeID := message.Payload.Before.ID
 
