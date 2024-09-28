@@ -8,7 +8,6 @@
     "database.password": "docker",
     "database.dbname": "mock",
     "database.server.name": "postgres-mock",
-    "topic.prefix": "postgres",
-    "schema.include.list": "public"
+    "topic.prefix": "mock"
   }
 }

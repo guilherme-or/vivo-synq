@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/connector"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/consumer"
@@ -36,7 +37,8 @@ func main() {
 	log.Println("Connector created and registered...")
 
 	// Consumer subscription to topic
-	if err := cs.Subscribe(os.Getenv("KAFKA_TOPIC"), nil); err != nil {
+	topics := strings.Split(os.Getenv("KAFKA_TOPICS"), ",")
+	if err := cs.SubscribeTopics(topics, nil); err != nil {
 		panic(err)
 	}
 	defer cs.Close()
