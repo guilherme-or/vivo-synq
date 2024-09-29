@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
 )
 
@@ -26,7 +27,11 @@ type KafkaMessage struct {
 }
 
 type KafkaMessageHandler struct {
-	productRepo repository.ProductRepository
+	productRepo     repository.ProductRepository
+	priceRepo       repository.PriceRepository
+	identifiersRepo repository.IdentifierRepository
+	tagsRepo        repository.TagRepository
+	descriptionRepo repository.DescriptionRepository
 }
 
 func NewKafkaMessageHandler(productRepo repository.ProductRepository) *KafkaMessageHandler {
@@ -51,51 +56,133 @@ func (h *KafkaMessageHandler) OnMessage(msg *kafka.Message) {
 
 	// TODO: Check message after and before type (Product, Price, Identifier, Description, Tag)
 
-	if message.Payload.Source.Table == "product" {
-		fmt.Println("Product")
-		// productAfter := message.Payload.After.(*entity.Product)
-		// productBefore := message.Payload.Before.(*entity.Product)
-	} else if message.Payload.Source.Table == "price" {
-		fmt.Println("Price")
-	} else if message.Payload.Source.Table == "identifier" {
-		fmt.Println("Identifier")
-	} else if message.Payload.Source.Table == "description" {
-		fmt.Println("Description")
-	} else if message.Payload.Source.Table == "tag" {
-		fmt.Println("Tag")
-	} else {
-		fmt.Println("Unknown")
-	}
-
-	// afterID := message.Payload.After.ID
-	// beforeID := message.Payload.Before.ID
-
-	// if afterID <= 0 && beforeID <= 0 { // Invalid ID value
-	// 	fmt.Print("Invalid ID")
-	// 	return
-	// } else if afterID > 0 && beforeID > 0 { // Update
-	// 	fmt.Print("UPDATE")
-	// 	if err := h.productRepo.Update(beforeID, &message.Payload.After); err != nil {
-	// 		fmt.Printf("...ERROR: %v\n", err)
-	// 		return
-	// 	}
-	// } else if afterID > 0 && beforeID <= 0 { // Insert
-	// 	fmt.Print("INSERT")
-	// 	if err := h.productRepo.Insert(&message.Payload.After); err != nil {
-	// 		fmt.Printf("...ERROR: %v\n", err)
-	// 		return
-	// 	}
-	// } else if afterID <= 0 && beforeID > 0 { // Delete
-	// 	fmt.Print("DELETE")
-	// 	if err := h.productRepo.Delete(beforeID, message.Payload.Before.ProductType); err != nil {
-	// 		fmt.Printf("...ERROR: %v\n", err)
-	// 		return
-	// 	}
-	// }
-
-	// fmt.Printf("...OK! Before: %d After: %d\n", beforeID, afterID)
+	checkTableChanged(message, h)
 }
 
 func (h *KafkaMessageHandler) OnFail(msg *kafka.Message, err error) {
 	fmt.Printf("FAIL: %v (%v)\n", err, msg)
+}
+
+func checkTableChanged(message KafkaMessage, h *KafkaMessageHandler) {
+
+	if message.Payload.Source.Table == "products" {
+
+		after := message.Payload.After.(*entity.Product)
+		before := message.Payload.Before.(*entity.Product)
+
+		actionTakerProducts(after, before, h)
+	}
+	if message.Payload.Source.Table == "prices" {
+
+		after := message.Payload.After.(*entity.Price)
+		before := message.Payload.Before.(*entity.Price)
+
+		actionTakerPrices(after, before, h)
+	}
+	if message.Payload.Source.Table == "identifiers" {
+
+		after := message.Payload.After.(*entity.Identifiers)
+		before := message.Payload.Before.(*entity.Identifiers)
+
+		actionTakerIdentifiers(after, before, h)
+	}
+	if message.Payload.Source.Table == "descriptions" {
+
+		after := message.Payload.After.(*entity.Description)
+		before := message.Payload.Before.(*entity.Description)
+
+		actionTakerDescriptions(after, before, h)
+	}
+	if message.Payload.Source.Table == "tags" {
+
+		after := message.Payload.After.(*entity.Tags)
+		before := message.Payload.Before.(*entity.Tags)
+
+		actionTakerTags(after, before, h)
+	}
+}
+
+func actionTakerProducts(after *entity.Product, before *entity.Product, h *KafkaMessageHandler) {
+
+	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+		fmt.Print("Invalid ID")
+		return
+	} else if after.ID > 0 && before.ID > 0 { // Update
+		fmt.Print("UPDATE")
+		if err := h.productRepo.Update(before.ID, after); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	} else if after.ID > 0 && before.ID <= 0 { // Insert
+		fmt.Print("INSERT")
+		if err := h.productRepo.Insert(after); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	} else if after.ID <= 0 && before.ID > 0 { // Delete
+		fmt.Print("DELETE")
+		if err := h.productRepo.Delete(before.ID, before.ProductType); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	}
+	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
+}
+
+func actionTakerPrices(after *entity.Price, before *entity.Price, h *KafkaMessageHandler) {
+
+	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+		fmt.Print("Invalid ID")
+		return
+	}
+	fmt.Print("UPDATE")
+	if err := h.priceRepo.Update(after); err != nil {
+		fmt.Printf("...ERROR: %v\n", err)
+		return
+	}
+
+	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
+}
+
+func actionTakerIdentifiers(after *entity.Identifiers, before *entity.Identifiers, h *KafkaMessageHandler) {
+
+	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+		fmt.Print("Invalid ID")
+		return
+	}
+	if err := h.identifiersRepo.Update(after); err != nil {
+		fmt.Printf("...ERROR: %v\n", err)
+		return
+	}
+
+	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
+}
+
+func actionTakerDescriptions(after *entity.Description, before *entity.Description, h *KafkaMessageHandler) {
+
+	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+		fmt.Print("Invalid ID")
+		return
+	}
+	fmt.Print("UPDATE")
+	if err := h.descriptionRepo.Update(after); err != nil {
+		fmt.Printf("...ERROR: %v\n", err)
+		return
+	}
+	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
+}
+
+func actionTakerTags(after *entity.Tags, before *entity.Tags, h *KafkaMessageHandler) {
+
+	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+		fmt.Print("Invalid ID")
+		return
+	}
+	fmt.Print("UPDATE")
+	if err := h.tagsRepo.Update(after); err != nil {
+		fmt.Printf("...ERROR: %v\n", err)
+		return
+	}
+
+	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
 }
