@@ -75,30 +75,26 @@ func checkTableChanged(message KafkaMessage, h *KafkaMessageHandler) {
 	if message.Payload.Source.Table == "prices" {
 
 		after := message.Payload.After.(*entity.Price)
-		before := message.Payload.Before.(*entity.Price)
 
-		actionTakerPrices(after, before, h)
+		actionTakerPrices(after, h)
 	}
 	if message.Payload.Source.Table == "identifiers" {
 
 		after := message.Payload.After.(*entity.Identifiers)
-		before := message.Payload.Before.(*entity.Identifiers)
 
-		actionTakerIdentifiers(after, before, h)
+		actionTakerIdentifiers(after, h)
 	}
 	if message.Payload.Source.Table == "descriptions" {
 
 		after := message.Payload.After.(*entity.Description)
-		before := message.Payload.Before.(*entity.Description)
 
-		actionTakerDescriptions(after, before, h)
+		actionTakerDescriptions(after, h)
 	}
 	if message.Payload.Source.Table == "tags" {
 
 		after := message.Payload.After.(*entity.Tags)
-		before := message.Payload.Before.(*entity.Tags)
 
-		actionTakerTags(after, before, h)
+		actionTakerTags(after, h)
 	}
 }
 
@@ -129,9 +125,9 @@ func actionTakerProducts(after *entity.Product, before *entity.Product, h *Kafka
 	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
 }
 
-func actionTakerPrices(after *entity.Price, before *entity.Price, h *KafkaMessageHandler) {
+func actionTakerPrices(after *entity.Price, h *KafkaMessageHandler) {
 
-	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+	if after.ProductID <= 0 { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
 	}
@@ -141,12 +137,12 @@ func actionTakerPrices(after *entity.Price, before *entity.Price, h *KafkaMessag
 		return
 	}
 
-	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
+	fmt.Printf("...OK! After: %d\n", after.ProductID)
 }
 
-func actionTakerIdentifiers(after *entity.Identifiers, before *entity.Identifiers, h *KafkaMessageHandler) {
+func actionTakerIdentifiers(after *entity.Identifiers, h *KafkaMessageHandler) {
 
-	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+	if after.ProductId <= 0 { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
 	}
@@ -155,12 +151,12 @@ func actionTakerIdentifiers(after *entity.Identifiers, before *entity.Identifier
 		return
 	}
 
-	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
+	fmt.Printf("...OK! After: %d\n", after.ProductId)
 }
 
-func actionTakerDescriptions(after *entity.Description, before *entity.Description, h *KafkaMessageHandler) {
+func actionTakerDescriptions(after *entity.Description, h *KafkaMessageHandler) {
 
-	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+	if after.ID <= 0 { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
 	}
@@ -169,12 +165,12 @@ func actionTakerDescriptions(after *entity.Description, before *entity.Descripti
 		fmt.Printf("...ERROR: %v\n", err)
 		return
 	}
-	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
+	fmt.Printf("...OK! After: %d\n", after.ID)
 }
 
-func actionTakerTags(after *entity.Tags, before *entity.Tags, h *KafkaMessageHandler) {
+func actionTakerTags(after *entity.Tags, h *KafkaMessageHandler) {
 
-	if after.ID <= 0 && before.ID <= 0 { // Invalid ID value
+	if after.ProductId <= 0 { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
 	}
@@ -184,5 +180,5 @@ func actionTakerTags(after *entity.Tags, before *entity.Tags, h *KafkaMessageHan
 		return
 	}
 
-	fmt.Printf("...OK! Before: %d After: %d\n", before.ID, after.ID)
+	fmt.Printf("...OK! After: %d\n", after.ID)
 }
