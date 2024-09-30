@@ -3,5 +3,7 @@ package repository
 import "github.com/guilherme-or/vivo-synq/consumer/internal/entity"
 
 type TagRepository interface {
-	Update(t *entity.Tags) error
+	Insert(after *entity.Tag) error
+	Update(before, after *entity.Tag) error
+	Delete(before *entity.Tag) error
 }

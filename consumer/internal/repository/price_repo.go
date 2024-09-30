@@ -3,5 +3,7 @@ package repository
 import "github.com/guilherme-or/vivo-synq/consumer/internal/entity"
 
 type PriceRepository interface {
-	Update(p *entity.Price) error
+	Insert(after *entity.Price) error
+	Update(before, after *entity.Price) error
+	Delete(before *entity.Price) error
 }

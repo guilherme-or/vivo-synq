@@ -1,10 +1,11 @@
-package repository
+package infra
 
 import (
 	"database/sql"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
 )
 
 const queryInsertProduct = "(id, status, product_name, subscription_type, start_date, end_date) VALUES ($1, $2, $3, $4, $5, $6);"
@@ -14,7 +15,7 @@ type PostgreSQLProductRepository struct {
 	db *sql.DB
 }
 
-func NewPostgreSQLProductRepository(conn *database.PostgreSQLConn) ProductRepository {
+func NewPostgreSQLProductRepository(conn *database.PostgreSQLConn) repository.ProductRepository {
 	return &PostgreSQLProductRepository{db: conn.GetDatabase()}
 }
 

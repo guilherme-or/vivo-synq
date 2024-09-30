@@ -1,4 +1,4 @@
-package repository
+package infra
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -23,7 +24,7 @@ type MixedProductRepository struct {
 	ctx     context.Context
 }
 
-func NewMixedProductRepository(sqlConn *database.PostgreSQLConn, noSqlConn *database.MongoDBConn) ProductRepository {
+func NewMixedProductRepository(sqlConn *database.PostgreSQLConn, noSqlConn *database.MongoDBConn) repository.ProductRepository {
 	sqlDB := sqlConn.GetDatabase()
 	noSqlClient := noSqlConn.GetClient().(*mongo.Client)
 	noSqlDB := noSqlClient.Database(DatabaseName)

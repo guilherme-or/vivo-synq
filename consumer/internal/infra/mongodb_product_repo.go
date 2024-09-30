@@ -1,4 +1,4 @@
-package repository
+package infra
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -23,7 +24,7 @@ type MongoDBProductRepository struct {
 	ctx    *context.Context
 }
 
-func NewMongoDBProductRepository(conn *database.MongoDBConn) ProductRepository {
+func NewMongoDBProductRepository(conn *database.MongoDBConn) repository.ProductRepository {
 	client := conn.GetClient().(*mongo.Client)
 	database := conn.GetDatabase("vivo-synq").(*mongo.Database)
 

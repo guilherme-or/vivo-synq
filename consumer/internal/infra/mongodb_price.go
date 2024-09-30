@@ -1,35 +1,36 @@
-package repository
+package infra
 
 import (
 	"context"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type MongoDBDescriptionRepository struct {
+type MongoDBPriceRepository struct {
 	client *mongo.Client
 	db     *mongo.Database
 	ctx    *context.Context
 }
 
-func NewMongoDBDescriptionRepository(conn *database.MongoDBConn) DescriptionRepository {
+func NewMongoDBPriceRepository(conn *database.MongoDBConn) repository.PriceRepository {
 	client := conn.GetClient().(*mongo.Client)
 	database := conn.GetDatabase("vivo-synq").(*mongo.Database)
 
-	return &MongoDBDescriptionRepository{
+	return &MongoDBPriceRepository{
 		client: client,
 		db:     database,
 		ctx:    conn.GetContext(),
 	}
 }
 
-func (m *MongoDBDescriptionRepository) Update(d *entity.Description) error {
+func (m *MongoDBPriceRepository) Update(p *entity.Price) error {
 	coll := m.db.Collection(UserProductsCollection)
 
-	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": d.ProductID}, d)
+	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": p.ProductID}, p)
 
 	if err != nil {
 		return err

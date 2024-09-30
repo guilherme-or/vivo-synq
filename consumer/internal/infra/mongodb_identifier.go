@@ -1,10 +1,11 @@
-package repository
+package infra
 
 import (
 	"context"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -15,7 +16,7 @@ type MongoDBIdentifierRepository struct {
 	ctx    *context.Context
 }
 
-func NewMongoDBIdentifierRepository(conn *database.MongoDBConn) IdentifierRepository {
+func NewMongoDBIdentifierRepository(conn *database.MongoDBConn) repository.IdentifierRepository {
 	client := conn.GetClient().(*mongo.Client)
 	database := conn.GetDatabase("vivo-synq").(*mongo.Database)
 
@@ -26,7 +27,7 @@ func NewMongoDBIdentifierRepository(conn *database.MongoDBConn) IdentifierReposi
 	}
 }
 
-func (m *MongoDBIdentifierRepository) Update(i *entity.Identifiers) error {
+func (m *MongoDBIdentifierRepository) Update(i *entity.Identifier) error {
 	coll := m.db.Collection(UserProductsCollection)
 
 	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": i.ProductId}, i)

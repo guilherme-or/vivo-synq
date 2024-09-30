@@ -10,7 +10,7 @@ import (
 	"github.com/guilherme-or/vivo-synq/consumer/internal/consumer"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/handler"
-	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/infra"
 	"github.com/joho/godotenv"
 )
 
@@ -45,32 +45,45 @@ func main() {
 	log.Println("Consumer subscribed. Starting to read messages...")
 
 	// Database connection instance
-	sqlConn, noSqlConn := databaseConnection()
-	defer sqlConn.Close()
+	// sqlConn, noSqlConn := databaseConnection()
+	noSqlConn := databaseConnection()
+	// defer sqlConn.Close()
 	defer noSqlConn.Close()
 
 	// Repository and Handler instance
-	// repo := repository.NewMongoDBProductRepository(conn.(*database.MongoDBConn))
 	// repo := repository.NewPostgreSQLProductRepository(conn.(*database.PostgreSQLConn))
-	repo := repository.NewMixedProductRepository(sqlConn.(*database.PostgreSQLConn), noSqlConn.(*database.MongoDBConn))
-	h := handler.NewKafkaMessageHandler(repo)
+	// repo := repository.NewMixedProductRepository(sqlConn.(*database.PostgreSQLConn), noSqlConn.(*database.MongoDBConn))
+	productRepo := infra.NewMongoDBProductRepository(noSqlConn.(*database.MongoDBConn))
+	priceRepo := infra.NewMongoDBPriceRepository(noSqlConn.(*database.MongoDBConn))
+	identifierRepo := infra.NewMongoDBIdentifierRepository(noSqlConn.(*database.MongoDBConn))
+	tagRepo := infra.NewMongoDBTagRepository(noSqlConn.(*database.MongoDBConn))
+	descriptionRepo := infra.NewMongoDBDescriptionRepository(noSqlConn.(*database.MongoDBConn))
+
+	h := handler.NewKafkaMessageHandler(
+		productRepo,
+		priceRepo,
+		identifierRepo,
+		tagRepo,
+		descriptionRepo,
+	)
 	log.Println("Message handler created with database repository...")
 
 	cs.Read(h)
 	fmt.Scan()
 }
 
-func databaseConnection() (database.SQLConn, database.NoSQLConn) {
+func databaseConnection() database.NoSQLConn {
 	// Database connection instance
-	sqlConn := database.NewPostgreSQLConn(os.Getenv("SQL_URI"))
-	if err := sqlConn.Open(); err != nil {
-		panic(err)
-	}
+	// sqlConn := database.NewPostgreSQLConn(os.Getenv("SQL_URI"))
+	// if err := sqlConn.Open(); err != nil {
+	// 	panic(err)
+	// }
 
 	noSqlConn := database.NewMongoDBConn(os.Getenv("NOSQL_URI"))
 	if err := noSqlConn.Open(); err != nil {
 		panic(err)
 	}
 
-	return sqlConn, noSqlConn
+	// return sqlConn, noSqlConn
+	return noSqlConn
 }
