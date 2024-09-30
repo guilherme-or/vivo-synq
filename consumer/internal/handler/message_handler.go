@@ -91,7 +91,6 @@ func (h *KafkaMessageHandler) processCDC(table TableName, after, before json.Raw
 	case ProductsTableName:
 		var a *entity.Product
 		var b *entity.Product
-
 		if err := json.Unmarshal(after, &a); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", ProductsTableName, err)
 			return
@@ -100,29 +99,43 @@ func (h *KafkaMessageHandler) processCDC(table TableName, after, before json.Raw
 			fmt.Printf("Error unmarshalling %s before: %v\n", ProductsTableName, err)
 			return
 		}
-
-		h.cdcProducts(a, b)
+		h.cdcProducts(b, a)
 	case PricesTableName:
 		var a *entity.Price
+		var b *entity.Price
 		if err := json.Unmarshal(after, &a); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", PricesTableName, err)
 			return
 		}
-		h.cdcPrices(a)
+		if err := json.Unmarshal(before, &b); err != nil {
+			fmt.Printf("Error unmarshalling %s before: %v\n", PricesTableName, err)
+			return
+		}
+		h.cdcPrices(b, a)
 	case IdentifiersTableName:
 		var a *entity.Identifier
+		var b *entity.Identifier
 		if err := json.Unmarshal(after, &a); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", IdentifiersTableName, err)
 			return
 		}
-		h.cdcIdentifiers(a)
+		if err := json.Unmarshal(before, &b); err != nil {
+			fmt.Printf("Error unmarshalling %s before: %v\n", IdentifiersTableName, err)
+			return
+		}
+		h.cdcIdentifiers(b, a)
 	case DescriptionsTableName:
 		var a *entity.Description
+		var b *entity.Description
 		if err := json.Unmarshal(after, &a); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", DescriptionsTableName, err)
 			return
 		}
-		h.cdcDescriptions(a)
+		if err := json.Unmarshal(before, &b); err != nil {
+			fmt.Printf("Error unmarshalling %s before: %v\n", DescriptionsTableName, err)
+			return
+		}
+		h.cdcDescriptions(b, a)
 	case TagsTableName:
 		var a *entity.Tag
 		var b *entity.Tag
@@ -131,7 +144,7 @@ func (h *KafkaMessageHandler) processCDC(table TableName, after, before json.Raw
 			return
 		}
 		if err := json.Unmarshal(before, &b); err != nil {
-			fmt.Printf("Error unmarshalling %s after: %v\n", TagsTableName, err)
+			fmt.Printf("Error unmarshalling %s before: %v\n", TagsTableName, err)
 			return
 		}
 		h.cdcTags(b, a)
@@ -140,7 +153,7 @@ func (h *KafkaMessageHandler) processCDC(table TableName, after, before json.Raw
 	}
 }
 
-func (h *KafkaMessageHandler) cdcProducts(after *entity.Product, before *entity.Product) {
+func (h *KafkaMessageHandler) cdcProducts(before, after *entity.Product) {
 	if after == nil && before == nil { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
@@ -167,45 +180,85 @@ func (h *KafkaMessageHandler) cdcProducts(after *entity.Product, before *entity.
 	fmt.Print("...OK!")
 }
 
-func (h *KafkaMessageHandler) cdcPrices(after *entity.Price) {
-	if after == nil { // Invalid ID value
+func (h *KafkaMessageHandler) cdcPrices(before, after *entity.Price) {
+	if after == nil && before == nil { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
-	}
-	fmt.Printf("UPDATE %s", PricesTableName)
-	if err := h.priceRepo.Update(after); err != nil {
-		fmt.Printf("...ERROR: %v\n", err)
-		return
+	} else if after != nil && before != nil { // Update
+		fmt.Printf("UPDATE %s", PricesTableName)
+		if err := h.priceRepo.Update(before, after); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	} else if after != nil && before == nil { // Insert
+		fmt.Printf("INSERT %s", PricesTableName)
+		if err := h.priceRepo.Insert(after); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	} else if after == nil && before != nil { // Delete
+		fmt.Printf("DELETE %s", PricesTableName)
+		if err := h.priceRepo.Delete(before); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
 	}
 
-	fmt.Printf("...OK! After: %d\n", after.ProductID)
+	fmt.Print("...OK!")
 }
 
-func (h *KafkaMessageHandler) cdcIdentifiers(after *entity.Identifier) {
-	if after == nil { // Invalid ID value
+func (h *KafkaMessageHandler) cdcIdentifiers(before, after *entity.Identifier) {
+	if after == nil && before == nil { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
-	}
-	fmt.Printf("UPDATE %s", IdentifiersTableName)
-	if err := h.identifiersRepo.Update(after); err != nil {
-		fmt.Printf("...ERROR: %v\n", err)
-		return
+	} else if after != nil && before != nil { // Update
+		fmt.Printf("UPDATE %s", IdentifiersTableName)
+		if err := h.identifiersRepo.Update(before, after); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	} else if after != nil && before == nil { // Insert
+		fmt.Printf("INSERT %s", IdentifiersTableName)
+		if err := h.identifiersRepo.Insert(after); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	} else if after == nil && before != nil { // Delete
+		fmt.Printf("DELETE %s", IdentifiersTableName)
+		if err := h.identifiersRepo.Delete(before); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
 	}
 
-	fmt.Printf("...OK! After: %d\n", after.ProductId)
+	fmt.Print("...OK!")
 }
 
-func (h *KafkaMessageHandler) cdcDescriptions(after *entity.Description) {
-	if after == nil { // Invalid ID value
+func (h *KafkaMessageHandler) cdcDescriptions(before, after *entity.Description) {
+	if after == nil && before == nil { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
+	} else if after != nil && before != nil { // Update
+		fmt.Printf("UPDATE %s", DescriptionsTableName)
+		if err := h.descriptionRepo.Update(before, after); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	} else if after != nil && before == nil { // Insert
+		fmt.Printf("INSERT %s", DescriptionsTableName)
+		if err := h.descriptionRepo.Insert(after); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
+	} else if after == nil && before != nil { // Delete
+		fmt.Printf("DELETE %s", DescriptionsTableName)
+		if err := h.descriptionRepo.Delete(before); err != nil {
+			fmt.Printf("...ERROR: %v\n", err)
+			return
+		}
 	}
-	fmt.Printf("UPDATE %s", DescriptionsTableName)
-	if err := h.descriptionRepo.Update(after); err != nil {
-		fmt.Printf("...ERROR: %v\n", err)
-		return
-	}
-	fmt.Printf("...OK! After: %d\n", after.ID)
+
+	fmt.Print("...OK!")
 }
 
 func (h *KafkaMessageHandler) cdcTags(before, after *entity.Tag) {
