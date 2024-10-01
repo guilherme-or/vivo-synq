@@ -177,7 +177,7 @@ func (h *KafkaMessageHandler) cdcProducts(before, after *entity.Product) {
 		}
 	}
 
-	fmt.Print("...OK!")
+	fmt.Print("...OK!\n")
 }
 
 func (h *KafkaMessageHandler) cdcPrices(before, after *entity.Price) {
@@ -204,7 +204,7 @@ func (h *KafkaMessageHandler) cdcPrices(before, after *entity.Price) {
 		}
 	}
 
-	fmt.Print("...OK!")
+	fmt.Print("...OK!\n")
 }
 
 func (h *KafkaMessageHandler) cdcIdentifiers(before, after *entity.Identifier) {
@@ -231,7 +231,7 @@ func (h *KafkaMessageHandler) cdcIdentifiers(before, after *entity.Identifier) {
 		}
 	}
 
-	fmt.Print("...OK!")
+	fmt.Print("...OK!\n")
 }
 
 func (h *KafkaMessageHandler) cdcDescriptions(before, after *entity.Description) {
@@ -258,7 +258,7 @@ func (h *KafkaMessageHandler) cdcDescriptions(before, after *entity.Description)
 		}
 	}
 
-	fmt.Print("...OK!")
+	fmt.Print("...OK!\n")
 }
 
 func (h *KafkaMessageHandler) cdcTags(before, after *entity.Tag) {
@@ -285,5 +285,5 @@ func (h *KafkaMessageHandler) cdcTags(before, after *entity.Tag) {
 		}
 	}
 
-	fmt.Print("...OK!")
+	fmt.Print("...OK!\n")
 }

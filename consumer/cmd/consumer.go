@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/connector"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/consumer"
@@ -23,7 +23,11 @@ func main() {
 	}
 
 	// Consumer instance
-	cs, err := consumer.New(os.Getenv("CONSUMER_HOST"), os.Getenv("CONSUMER_GROUP_ID"), consumer.AOREarliest)
+	cs1, err := consumer.New(os.Getenv("CONSUMER_HOST"), os.Getenv("CONSUMER_GROUP_ID_1"), consumer.AOREarliest)
+	if err != nil {
+		panic(err)
+	}
+	cs2, err := consumer.New(os.Getenv("CONSUMER_HOST"), os.Getenv("CONSUMER_GROUP_ID_2"), consumer.AOREarliest)
 	if err != nil {
 		panic(err)
 	}
@@ -38,10 +42,15 @@ func main() {
 
 	// Consumer subscription to topic
 	topics := strings.Split(os.Getenv("KAFKA_TOPICS"), ",")
-	if err := cs.SubscribeTopics(topics, nil); err != nil {
+
+	if err := cs1.Subscribe(topics[0], nil); err != nil {
 		panic(err)
 	}
-	defer cs.Close()
+	defer cs1.Close()
+	if err := cs2.SubscribeTopics(topics[1:], nil); err != nil {
+		panic(err)
+	}
+	defer cs2.Close()
 	log.Println("Consumer subscribed. Starting to read messages...")
 
 	// Database connection instance
@@ -68,8 +77,9 @@ func main() {
 	)
 	log.Println("Message handler created with database repository...")
 
-	cs.Read(h)
-	fmt.Scan()
+	cs1.ReadTimeout(h, (time.Second * 30))
+	cs1.Close()
+	cs2.Read(h)
 }
 
 func databaseConnection() database.NoSQLConn {

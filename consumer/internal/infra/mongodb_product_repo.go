@@ -28,6 +28,9 @@ func NewMongoDBProductRepository(conn *database.MongoDBConn) repository.ProductR
 	client := conn.GetClient().(*mongo.Client)
 	database := conn.GetDatabase("vivo-synq").(*mongo.Database)
 
+	coll := database.Collection (UserProductsCollection)
+	coll.DeleteMany(context.Background(), bson.M{})
+
 	return &MongoDBProductRepository{
 		client: client,
 		db:     database,
@@ -37,6 +40,12 @@ func NewMongoDBProductRepository(conn *database.MongoDBConn) repository.ProductR
 
 func (m *MongoDBProductRepository) Insert(after *entity.Product) error {
 	coll := m.db.Collection(UserProductsCollection)
+
+	after.Descriptions = make([]entity.Description, 0)
+	after.Identifiers = make([]string, 0)
+	after.Tags = make([]string, 0)
+	after.Prices = make([]entity.Price, 0)
+	after.SubProducts = make([]entity.Product, 0)
 
 	res, err := coll.InsertOne(
 		*m.ctx,

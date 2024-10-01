@@ -30,7 +30,7 @@ func NewMongoDBPriceRepository(conn *database.MongoDBConn) repository.PriceRepos
 
 func (m *MongoDBPriceRepository) Insert(after *entity.Price) error {
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": after.ProductID}, bson.M{"$push": bson.M{"prices": after.Description}})
+	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": after.ProductID}, bson.M{"$push": bson.M{"prices": after}})
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (m *MongoDBPriceRepository) Update(before, after *entity.Price) error {
 		*m.ctx,
 		bson.M{
 			"id":     after.ProductID,
-			"prices": bson.M{"$elemMatch": bson.M{"$eq": before.Description}},
+			"prices": bson.M{"$elemMatch": bson.M{"$eq": before.ID}},
 		},
 		bson.M{
 			"$set": bson.M{"prices.$": after},
@@ -72,7 +72,7 @@ func (m *MongoDBPriceRepository) Update(before, after *entity.Price) error {
 func (m *MongoDBPriceRepository) Delete(before *entity.Price) error {
 	coll := m.db.Collection(UserProductsCollection)
 	res, err := coll.UpdateOne(
-		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$pull": bson.M{"prices": before.Description}},
+		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$pull": bson.M{"prices": bson.M{"id": before.ID}}},
 	)
 	if err != nil {
 		return err

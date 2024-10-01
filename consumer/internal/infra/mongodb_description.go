@@ -30,7 +30,7 @@ func NewMongoDBDescriptionRepository(conn *database.MongoDBConn) repository.Desc
 
 func (m *MongoDBDescriptionRepository) Insert(after *entity.Description) error {
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": after.ProductID}, bson.M{"$push": bson.M{"descriptions": after.Text}})
+	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": after.ProductID}, bson.M{"$push": bson.M{"descriptions": after}})
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (m *MongoDBDescriptionRepository) Update(before, after *entity.Description)
 		*m.ctx,
 		bson.M{
 			"id":           after.ProductID,
-			"descriptions": bson.M{"$elemMatch": bson.M{"$eq": before.Text}},
+			"descriptions": bson.M{"$elemMatch": bson.M{"$eq": before.ID}},
 		},
 		bson.M{
 			"$set": bson.M{"descriptions.$": after},
@@ -72,7 +72,7 @@ func (m *MongoDBDescriptionRepository) Update(before, after *entity.Description)
 func (m *MongoDBDescriptionRepository) Delete(before *entity.Description) error {
 	coll := m.db.Collection(UserProductsCollection)
 	res, err := coll.UpdateOne(
-		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$pull": bson.M{"descriptions": before.Text}},
+		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$pull": bson.M{"descriptions": bson.M{"id": before.ID}}},
 	)
 	if err != nil {
 		return err
