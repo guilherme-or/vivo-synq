@@ -57,7 +57,7 @@ func (m *MongoDBProductRepository) Insert(p *entity.Product) error {
 func (m *MongoDBProductRepository) Update(id int, p *entity.Product) error {
 	coll := m.db.Collection(UserProductsCollection)
 
-	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": id}, p)
+	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": id}, bson.M{"$set": p})
 
 	if err != nil {
 		return err
@@ -73,7 +73,7 @@ func (m *MongoDBProductRepository) Update(id int, p *entity.Product) error {
 func (m *MongoDBProductRepository) Delete(id int, productType string) error {
 	coll := m.db.Collection(UserProductsCollection)
 
-	res, err := coll.DeleteOne(*m.ctx, bson.M{"id": id, "product_type": productType})
+	res, err := coll.DeleteOne(*m.ctx, bson.M{"id": id})
 	if err != nil {
 		return err
 	}
