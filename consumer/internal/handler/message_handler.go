@@ -159,7 +159,7 @@ func (h *KafkaMessageHandler) cdcProducts(before, after *entity.Product) {
 		return
 	} else if after != nil && before != nil { // Update
 		fmt.Printf("UPDATE %s", ProductsTableName)
-		if err := h.productRepo.Update(before.ID, after); err != nil {
+		if err := h.productRepo.Update(before, after); err != nil {
 			fmt.Printf("...ERROR: %v\n", err)
 			return
 		}
@@ -171,7 +171,7 @@ func (h *KafkaMessageHandler) cdcProducts(before, after *entity.Product) {
 		}
 	} else if after == nil && before != nil { // Delete
 		fmt.Printf("DELETE %s", ProductsTableName)
-		if err := h.productRepo.Delete(before.ID, before.ProductType); err != nil {
+		if err := h.productRepo.Delete(before); err != nil {
 			fmt.Printf("...ERROR: %v\n", err)
 			return
 		}

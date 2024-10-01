@@ -35,12 +35,12 @@ func NewMongoDBProductRepository(conn *database.MongoDBConn) repository.ProductR
 	}
 }
 
-func (m *MongoDBProductRepository) Insert(p *entity.Product) error {
+func (m *MongoDBProductRepository) Insert(after *entity.Product) error {
 	coll := m.db.Collection(UserProductsCollection)
 
 	res, err := coll.InsertOne(
 		*m.ctx,
-		p,
+		after,
 	)
 
 	if err != nil {
@@ -54,10 +54,14 @@ func (m *MongoDBProductRepository) Insert(p *entity.Product) error {
 	return nil
 }
 
-func (m *MongoDBProductRepository) Update(id int, p *entity.Product) error {
+func (m *MongoDBProductRepository) Update(before, after *entity.Product) error {
+	if before.ID != after.ID {
+		return errors.New("product id must be the same (tag update)")
+	}
+
 	coll := m.db.Collection(UserProductsCollection)
 
-	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": id}, bson.M{"$set": p})
+	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": before.ID}, bson.M{"$set": after})
 
 	if err != nil {
 		return err
@@ -70,10 +74,10 @@ func (m *MongoDBProductRepository) Update(id int, p *entity.Product) error {
 	return nil
 }
 
-func (m *MongoDBProductRepository) Delete(id int, productType string) error {
+func (m *MongoDBProductRepository) Delete(before *entity.Product) error {
 	coll := m.db.Collection(UserProductsCollection)
 
-	res, err := coll.DeleteOne(*m.ctx, bson.M{"id": id})
+	res, err := coll.DeleteOne(*m.ctx, bson.M{"id": before.ID})
 	if err != nil {
 		return err
 	}
