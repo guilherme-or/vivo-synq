@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"errors"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
@@ -27,11 +28,52 @@ func NewMongoDBIdentifierRepository(conn *database.MongoDBConn) repository.Ident
 	}
 }
 
-func (m *MongoDBIdentifierRepository) Update(i *entity.Identifier) error {
+func (m *MongoDBIdentifierRepository) Insert(after *entity.Identifier) error {
 	coll := m.db.Collection(UserProductsCollection)
+	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": after.ProductID}, bson.M{"$push": bson.M{"identifiers": after.Identifier}})
+	if err != nil {
+		return err
+	}
 
-	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": i.ProductId}, i)
+	if res.MatchedCount == 0 || res.ModifiedCount == 0 {
+		return ErrNoResult
+	}
 
+	return nil
+}
+
+func (m *MongoDBIdentifierRepository) Update(before, after *entity.Identifier) error {
+	if before.ProductID != after.ProductID {
+		return errors.New("product id must be the same (identifier update)")
+	}
+
+	coll := m.db.Collection(UserProductsCollection)
+	res, err := coll.UpdateOne(
+		*m.ctx,
+		bson.M{
+			"id":          after.ProductID,
+			"identifiers": bson.M{"$elemMatch": bson.M{"$eq": before.Identifier}},
+		},
+		bson.M{
+			"$set": bson.M{"identifiers.$": after.Identifier},
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	if res.MatchedCount == 0 || res.ModifiedCount == 0 {
+		return ErrNoResult
+	}
+
+	return nil
+}
+
+func (m *MongoDBIdentifierRepository) Delete(before *entity.Identifier) error {
+	coll := m.db.Collection(UserProductsCollection)
+	res, err := coll.UpdateOne(
+		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$pull": bson.M{"identifiers": before.Identifier}},
+	)
 	if err != nil {
 		return err
 	}

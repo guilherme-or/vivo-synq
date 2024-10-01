@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"errors"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
@@ -27,11 +28,46 @@ func NewMongoDBPriceRepository(conn *database.MongoDBConn) repository.PriceRepos
 	}
 }
 
-func (m *MongoDBPriceRepository) Update(p *entity.Price) error {
+func (m *MongoDBPriceRepository) Insert(after *entity.Price) error {
 	coll := m.db.Collection(UserProductsCollection)
+	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": after.ProductID}, bson.M{"$push": bson.M{"prices": after.Description}})
+	if err != nil {
+		return err
+	}
 
-	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": p.ProductID}, p)
+	if res.MatchedCount == 0 || res.ModifiedCount == 0 {
+		return ErrNoResult
+	}
 
+	return nil
+}
+
+func (m *MongoDBPriceRepository) Update(before, after *entity.Price) error {
+	if before.ProductID != after.ProductID {
+		return errors.New("product id must be the same (price update)")
+	}
+
+	coll := m.db.Collection(UserProductsCollection)
+	res, err := coll.UpdateOne(
+		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$set": bson.M{"prices": after}},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if res.MatchedCount == 0 || res.ModifiedCount == 0 {
+		return ErrNoResult
+	}
+
+	return nil
+}
+
+func (m *MongoDBPriceRepository) Delete(before *entity.Price) error {
+	coll := m.db.Collection(UserProductsCollection)
+	res, err := coll.UpdateOne(
+		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$pull": bson.M{"prices": before.Description}},
+	)
 	if err != nil {
 		return err
 	}
