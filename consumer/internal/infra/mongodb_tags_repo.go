@@ -55,7 +55,7 @@ func (m *MongoDBTagRepository) Update(before, after *entity.Tag) error {
 			"tags": bson.M{"$elemMatch": bson.M{"$eq": before.Tag}},
 		},
 		bson.M{
-			"$set": bson.M{"tags.$": before.Tag},
+			"$set": bson.M{"tags.$": after},
 		},
 	)
 	if err != nil {

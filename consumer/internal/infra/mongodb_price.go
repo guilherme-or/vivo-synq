@@ -49,9 +49,15 @@ func (m *MongoDBPriceRepository) Update(before, after *entity.Price) error {
 
 	coll := m.db.Collection(UserProductsCollection)
 	res, err := coll.UpdateOne(
-		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$set": bson.M{"prices": after}},
+		*m.ctx,
+		bson.M{
+			"id":     after.ProductID,
+			"prices": bson.M{"$elemMatch": bson.M{"$eq": before.Description}},
+		},
+		bson.M{
+			"$set": bson.M{"prices.$": after},
+		},
 	)
-
 	if err != nil {
 		return err
 	}

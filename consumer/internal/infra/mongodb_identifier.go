@@ -55,7 +55,7 @@ func (m *MongoDBIdentifierRepository) Update(before, after *entity.Identifier) e
 			"identifiers": bson.M{"$elemMatch": bson.M{"$eq": before.Identifier}},
 		},
 		bson.M{
-			"$set": bson.M{"identifiers.$": after.Identifier},
+			"$set": bson.M{"identifiers.$": after},
 		},
 	)
 	if err != nil {
