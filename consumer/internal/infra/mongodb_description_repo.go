@@ -30,7 +30,15 @@ func NewMongoDBDescriptionRepository(conn *database.MongoDBConn) repository.Desc
 
 func (m *MongoDBDescriptionRepository) Insert(after *entity.Description) error {
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": after.ProductID}, bson.M{"$push": bson.M{"descriptions": after}})
+
+	var p entity.Product
+	if err := coll.FindOne(*m.ctx, bson.M{"id": after.ProductID}).Decode(&p); err != nil {
+		return err
+	}
+
+	p.Descriptions = append(p.Descriptions, *after)
+
+	res, err := coll.ReplaceOne(*m.ctx, bson.M{"id": after.ProductID}, p)
 	if err != nil {
 		return err
 	}
@@ -46,18 +54,21 @@ func (m *MongoDBDescriptionRepository) Update(before, after *entity.Description)
 	if before.ProductID != after.ProductID {
 		return errors.New("product id must be the same (description update)")
 	}
-
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(
-		*m.ctx,
-		bson.M{
-			"id":           after.ProductID,
-			"descriptions": bson.M{"$elemMatch": bson.M{"$eq": before.ID}},
-		},
-		bson.M{
-			"$set": bson.M{"descriptions.$": after},
-		},
-	)
+
+	var p entity.Product
+	if err := coll.FindOne(*m.ctx, bson.M{"id": after.ProductID}).Decode(&p); err != nil {
+		return err
+	}
+
+	for i, d := range p.Descriptions {
+		if d.ID == before.ID {
+			p.Descriptions[i] = *after
+			break
+		}
+	}
+
+	res, err := coll.ReplaceOne(*m.ctx, bson.M{"id": after.ProductID}, p)
 	if err != nil {
 		return err
 	}
@@ -71,9 +82,22 @@ func (m *MongoDBDescriptionRepository) Update(before, after *entity.Description)
 
 func (m *MongoDBDescriptionRepository) Delete(before *entity.Description) error {
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(
-		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$pull": bson.M{"descriptions": bson.M{"id": before.ID}}},
-	)
+
+	var p entity.Product
+	if err := coll.FindOne(*m.ctx, bson.M{"id": before.ProductID}).Decode(&p); err != nil {
+		return err
+	}
+
+	newDescriptions := make([]entity.Description, 0)
+	for _, d := range p.Descriptions {
+		if d.ID != before.ID {
+			p.Descriptions = append(p.Descriptions, *before)
+		}
+	}
+
+	p.Descriptions = newDescriptions
+
+	res, err := coll.ReplaceOne(*m.ctx, bson.M{"id": before.ProductID}, p)
 	if err != nil {
 		return err
 	}

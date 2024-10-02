@@ -12,6 +12,7 @@ type AutoOffsetReset string
 const (
 	AORLatest   AutoOffsetReset = "latest"
 	AOREarliest AutoOffsetReset = "earliest"
+	AORNone     AutoOffsetReset = "none"
 )
 
 type KafkaConsumer struct {

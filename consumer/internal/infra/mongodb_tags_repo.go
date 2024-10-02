@@ -30,6 +30,7 @@ func NewMongoDBTagRepository(conn *database.MongoDBConn) repository.TagRepositor
 
 func (m *MongoDBTagRepository) Insert(after *entity.Tag) error {
 	coll := m.db.Collection(UserProductsCollection)
+	
 	res, err := coll.UpdateOne(*m.ctx, bson.M{"id": after.ProductId}, bson.M{"$push": bson.M{"tags": after.Tag}})
 	if err != nil {
 		return err
@@ -46,18 +47,21 @@ func (m *MongoDBTagRepository) Update(before, after *entity.Tag) error {
 	if before.ProductId != after.ProductId {
 		return errors.New("product id must be the same (tag update)")
 	}
-
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(
-		*m.ctx,
-		bson.M{
-			"id":   after.ProductId,
-			"tags": bson.M{"$elemMatch": bson.M{"$eq": before.Tag}},
-		},
-		bson.M{
-			"$set": bson.M{"tags.$": after},
-		},
-	)
+
+	var p entity.Product
+	if err := coll.FindOne(*m.ctx, bson.M{"id": after.ProductId}).Decode(&p); err != nil {
+		return err
+	}
+
+	for i, t := range p.Tags {
+		if t == before.Tag {
+			p.Tags[i] = after.Tag
+			break
+		}
+	}
+
+	res, err := coll.ReplaceOne(*m.ctx, bson.M{"id": after.ProductId}, p)
 	if err != nil {
 		return err
 	}
@@ -71,9 +75,22 @@ func (m *MongoDBTagRepository) Update(before, after *entity.Tag) error {
 
 func (m *MongoDBTagRepository) Delete(before *entity.Tag) error {
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(
-		*m.ctx, bson.M{"id": before.ProductId}, bson.M{"$pull": bson.M{"tags": before.Tag}},
-	)
+
+	var p entity.Product
+	if err := coll.FindOne(*m.ctx, bson.M{"id": before.ProductId}).Decode(&p); err != nil {
+		return err
+	}
+
+	newTags := make([]string, 0)
+	for _, t := range p.Tags {
+		if t != before.Tag {
+			newTags = append(newTags, t)
+		}
+	}
+
+	p.Tags = newTags
+
+	res, err := coll.ReplaceOne(*m.ctx, bson.M{"id": before.ProductId}, p)
 	if err != nil {
 		return err
 	}

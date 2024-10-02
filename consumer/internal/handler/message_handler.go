@@ -63,6 +63,7 @@ func NewKafkaMessageHandler(
 
 func (h *KafkaMessageHandler) OnMessage(msg *kafka.Message) {
 	var message KafkaMessage
+	fmt.Printf("Message on %s [%d] at offset %v:\n", *msg.TopicPartition.Topic, msg.TopicPartition.Partition, msg.TopicPartition.Offset)
 
 	if err := json.Unmarshal(msg.Value, &message); err != nil {
 		fmt.Printf("Error unmarshalling message: %v\n", err)
@@ -70,14 +71,20 @@ func (h *KafkaMessageHandler) OnMessage(msg *kafka.Message) {
 	}
 
 	// JSON Pretty Print
-	// jsonBytes, err := json.MarshalIndent(string(msg.Value), "", "    ")
-	// if err != nil {
-	// 	fmt.Printf("Error marshalling message: %v\n", err)
-	// 	return
-	// }
-	// fmt.Println(string(jsonBytes))
+	afterJsonBytes, err := json.MarshalIndent(message.Payload.After, "", "    ")
+	if err != nil {
+		fmt.Printf("Error marshalling message: %v\n", err)
+		return
+	}
+	fmt.Println("After: ", string(afterJsonBytes))
+	beforeJsonBytes, err := json.MarshalIndent(message.Payload.Before, "", "    ")
+	if err != nil {
+		fmt.Printf("Error marshalling message: %v\n", err)
+		return
+	}
+	fmt.Println("Before: ", string(beforeJsonBytes))
 
-	h.processCDC(TableName(message.Payload.Source.Table), message.Payload.After, message.Payload.Before)
+	h.processCDC(TableName(message.Payload.Source.Table), afterJsonBytes, beforeJsonBytes)
 }
 
 func (h *KafkaMessageHandler) OnFail(msg *kafka.Message, err error) {
@@ -86,68 +93,68 @@ func (h *KafkaMessageHandler) OnFail(msg *kafka.Message, err error) {
 }
 
 // Process the CDC (Capture data change) on Products, Prices, Identifiers, Descriptions and Tags
-func (h *KafkaMessageHandler) processCDC(table TableName, after, before json.RawMessage) {
+func (h *KafkaMessageHandler) processCDC(table TableName, after, before []byte) {
 	switch table {
 	case ProductsTableName:
-		var a *entity.Product
-		var b *entity.Product
-		if err := json.Unmarshal(after, &a); err != nil {
+		var afterProduct *entity.Product
+		var beforeProduct *entity.Product
+		if err := json.Unmarshal(after, &afterProduct); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", ProductsTableName, err)
 			return
 		}
-		if err := json.Unmarshal(before, &b); err != nil {
+		if err := json.Unmarshal(before, &beforeProduct); err != nil {
 			fmt.Printf("Error unmarshalling %s before: %v\n", ProductsTableName, err)
 			return
 		}
-		h.cdcProducts(b, a)
+		h.cdcProducts(beforeProduct, afterProduct)
 	case PricesTableName:
-		var a *entity.Price
-		var b *entity.Price
-		if err := json.Unmarshal(after, &a); err != nil {
+		var afterPrice *entity.Price
+		var beforePrice *entity.Price
+		if err := json.Unmarshal(after, &afterPrice); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", PricesTableName, err)
 			return
 		}
-		if err := json.Unmarshal(before, &b); err != nil {
+		if err := json.Unmarshal(before, &beforePrice); err != nil {
 			fmt.Printf("Error unmarshalling %s before: %v\n", PricesTableName, err)
 			return
 		}
-		h.cdcPrices(b, a)
+		h.cdcPrices(beforePrice, afterPrice)
 	case IdentifiersTableName:
-		var a *entity.Identifier
-		var b *entity.Identifier
-		if err := json.Unmarshal(after, &a); err != nil {
+		var afterIdentifier *entity.Identifier
+		var beforeIdentifier *entity.Identifier
+		if err := json.Unmarshal(after, &afterIdentifier); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", IdentifiersTableName, err)
 			return
 		}
-		if err := json.Unmarshal(before, &b); err != nil {
+		if err := json.Unmarshal(before, &beforeIdentifier); err != nil {
 			fmt.Printf("Error unmarshalling %s before: %v\n", IdentifiersTableName, err)
 			return
 		}
-		h.cdcIdentifiers(b, a)
+		h.cdcIdentifiers(beforeIdentifier, afterIdentifier)
 	case DescriptionsTableName:
-		var a *entity.Description
-		var b *entity.Description
-		if err := json.Unmarshal(after, &a); err != nil {
+		var afterDescription *entity.Description
+		var beforeDescription *entity.Description
+		if err := json.Unmarshal(after, &afterDescription); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", DescriptionsTableName, err)
 			return
 		}
-		if err := json.Unmarshal(before, &b); err != nil {
+		if err := json.Unmarshal(before, &beforeDescription); err != nil {
 			fmt.Printf("Error unmarshalling %s before: %v\n", DescriptionsTableName, err)
 			return
 		}
-		h.cdcDescriptions(b, a)
+		h.cdcDescriptions(beforeDescription, afterDescription)
 	case TagsTableName:
-		var a *entity.Tag
-		var b *entity.Tag
-		if err := json.Unmarshal(after, &a); err != nil {
+		var afterTag *entity.Tag
+		var beforeTag *entity.Tag
+		if err := json.Unmarshal(after, &afterTag); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", TagsTableName, err)
 			return
 		}
-		if err := json.Unmarshal(before, &b); err != nil {
+		if err := json.Unmarshal(before, &beforeTag); err != nil {
 			fmt.Printf("Error unmarshalling %s before: %v\n", TagsTableName, err)
 			return
 		}
-		h.cdcTags(b, a)
+		h.cdcTags(beforeTag, afterTag)
 	default:
 		fmt.Printf("No handler for table %s\n", table)
 	}
@@ -192,6 +199,7 @@ func (h *KafkaMessageHandler) cdcPrices(before, after *entity.Price) {
 		}
 	} else if after != nil && before == nil { // Insert
 		fmt.Printf("INSERT %s", PricesTableName)
+		fmt.Println("Sending to insert price: ", after.ID, after.Amount, after.Description, after.ProductID, after.RecurringPeriod, after.Type)
 		if err := h.priceRepo.Insert(after); err != nil {
 			fmt.Printf("...ERROR: %v\n", err)
 			return

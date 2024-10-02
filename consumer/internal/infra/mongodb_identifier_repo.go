@@ -46,18 +46,21 @@ func (m *MongoDBIdentifierRepository) Update(before, after *entity.Identifier) e
 	if before.ProductID != after.ProductID {
 		return errors.New("product id must be the same (identifier update)")
 	}
-
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(
-		*m.ctx,
-		bson.M{
-			"id":          after.ProductID,
-			"identifiers": bson.M{"$elemMatch": bson.M{"$eq": before.Identifier}},
-		},
-		bson.M{
-			"$set": bson.M{"identifiers.$": after},
-		},
-	)
+
+	var p entity.Product
+	if err := coll.FindOne(*m.ctx, bson.M{"id": before.ProductID}).Decode(&p); err != nil {
+		return err
+	}
+
+	for i, id := range p.Identifiers {
+		if id == before.Identifier {
+			p.Identifiers[i] = after.Identifier
+			break
+		}
+	}
+
+	res, err := coll.ReplaceOne(*m.ctx, bson.M{"id": after.ProductID}, p)
 	if err != nil {
 		return err
 	}
@@ -71,9 +74,22 @@ func (m *MongoDBIdentifierRepository) Update(before, after *entity.Identifier) e
 
 func (m *MongoDBIdentifierRepository) Delete(before *entity.Identifier) error {
 	coll := m.db.Collection(UserProductsCollection)
-	res, err := coll.UpdateOne(
-		*m.ctx, bson.M{"id": before.ProductID}, bson.M{"$pull": bson.M{"identifiers": before.Identifier}},
-	)
+
+	var p entity.Product
+	if err := coll.FindOne(*m.ctx, bson.M{"id": before.ProductID}).Decode(&p); err != nil {
+		return err
+	}
+
+	newIdentifiers := make([]string, 0)
+	for _, id := range p.Identifiers {
+		if id != before.Identifier {
+			newIdentifiers = append(newIdentifiers, id)
+		}
+	}
+
+	p.Identifiers = newIdentifiers
+
+	res, err := coll.ReplaceOne(*m.ctx, bson.M{"id": before.ProductID}, p)
 	if err != nil {
 		return err
 	}

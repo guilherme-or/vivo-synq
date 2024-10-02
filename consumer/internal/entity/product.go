@@ -9,10 +9,10 @@ type Product struct {
 	StartDate        int64         `json:"start_date" bson:"start_date"`
 	EndDate          int64         `json:"end_date" bson:"end_date"`
 	UserID           *int          `json:"user_id" bson:"user_id"`
-	ParentProductID  *int          `json:"parent_product_id,omitempty" bson:"parent_product_id"`
-	SubProducts      []Product     `json:"sub_products,omitempty" bson:"sub_products"`
-	Tags             []string      `json:"tags,omitempty" bson:"tags"`
-	Identifiers      []string      `json:"identifiers,omitempty" bson:"identifiers"`
-	Descriptions     []Description `json:"descriptions,omitempty" bson:"descriptions"`
-	Prices           []Price       `json:"prices,omitempty" bson:"prices"`
+	ParentProductID  *int          `json:"parent_product_id" bson:"parent_product_id"`
+	SubProducts      []Product     `json:"sub_products" bson:"sub_products"`
+	Tags             []string      `json:"tags" bson:"tags"`
+	Identifiers      []string      `json:"identifiers" bson:"identifiers"`
+	Descriptions     []Description `json:"descriptions" bson:"descriptions"`
+	Prices           []Price       `json:"prices" bson:"prices"`
 }

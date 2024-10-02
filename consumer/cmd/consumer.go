@@ -4,7 +4,6 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/connector"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/consumer"
@@ -23,14 +22,11 @@ func main() {
 	}
 
 	// Consumer instance
-	cs1, err := consumer.New(os.Getenv("CONSUMER_HOST"), os.Getenv("CONSUMER_GROUP_ID_1"), consumer.AOREarliest)
+	cs, err := consumer.New(os.Getenv("CONSUMER_HOST"), os.Getenv("CONSUMER_GROUP_ID"), consumer.AOREarliest)
 	if err != nil {
 		panic(err)
 	}
-	cs2, err := consumer.New(os.Getenv("CONSUMER_HOST"), os.Getenv("CONSUMER_GROUP_ID_2"), consumer.AOREarliest)
-	if err != nil {
-		panic(err)
-	}
+
 	log.Println("Consumer created...")
 
 	// Connector instance
@@ -42,15 +38,10 @@ func main() {
 
 	// Consumer subscription to topic
 	topics := strings.Split(os.Getenv("KAFKA_TOPICS"), ",")
-
-	if err := cs1.Subscribe(topics[0], nil); err != nil {
+	if err := cs.SubscribeTopics(topics, nil); err != nil {
 		panic(err)
 	}
-	defer cs1.Close()
-	if err := cs2.SubscribeTopics(topics[1:], nil); err != nil {
-		panic(err)
-	}
-	defer cs2.Close()
+	defer cs.Close()
 	log.Println("Consumer subscribed. Starting to read messages...")
 
 	// Database connection instance
@@ -60,30 +51,14 @@ func main() {
 	defer noSqlConn.Close()
 
 	// Repository and Handler instance
-	// repo := repository.NewPostgreSQLProductRepository(conn.(*database.PostgreSQLConn))
-	// repo := repository.NewMixedProductRepository(sqlConn.(*database.PostgreSQLConn), noSqlConn.(*database.MongoDBConn))
-	productRepo := infra.NewMongoDBProductRepository(noSqlConn.(*database.MongoDBConn))
-	priceRepo := infra.NewMongoDBPriceRepository(noSqlConn.(*database.MongoDBConn))
-	identifierRepo := infra.NewMongoDBIdentifierRepository(noSqlConn.(*database.MongoDBConn))
-	tagRepo := infra.NewMongoDBTagRepository(noSqlConn.(*database.MongoDBConn))
-	descriptionRepo := infra.NewMongoDBDescriptionRepository(noSqlConn.(*database.MongoDBConn))
-
-	h := handler.NewKafkaMessageHandler(
-		productRepo,
-		priceRepo,
-		identifierRepo,
-		tagRepo,
-		descriptionRepo,
-	)
+	h := handlerInstance(noSqlConn)
 	log.Println("Message handler created with database repository...")
 
-	cs1.ReadTimeout(h, (time.Second * 30))
-	cs1.Close()
-	cs2.Read(h)
+	// Infinite loop to read messages
+	cs.Read(h)
 }
 
 func databaseConnection() database.NoSQLConn {
-	// Database connection instance
 	// sqlConn := database.NewPostgreSQLConn(os.Getenv("SQL_URI"))
 	// if err := sqlConn.Open(); err != nil {
 	// 	panic(err)
@@ -96,4 +71,22 @@ func databaseConnection() database.NoSQLConn {
 
 	// return sqlConn, noSqlConn
 	return noSqlConn
+}
+
+func handlerInstance(noSqlConn database.NoSQLConn) *handler.KafkaMessageHandler {
+	// repo := repository.NewPostgreSQLProductRepository(conn.(*database.PostgreSQLConn))
+	// repo := repository.NewMixedProductRepository(sqlConn.(*database.PostgreSQLConn), noSqlConn.(*database.MongoDBConn))
+	productRepo := infra.NewMongoDBProductRepository(noSqlConn.(*database.MongoDBConn))
+	priceRepo := infra.NewMongoDBPriceRepository(noSqlConn.(*database.MongoDBConn))
+	identifierRepo := infra.NewMongoDBIdentifierRepository(noSqlConn.(*database.MongoDBConn))
+	tagRepo := infra.NewMongoDBTagRepository(noSqlConn.(*database.MongoDBConn))
+	descriptionRepo := infra.NewMongoDBDescriptionRepository(noSqlConn.(*database.MongoDBConn))
+
+	return handler.NewKafkaMessageHandler(
+		productRepo,
+		priceRepo,
+		identifierRepo,
+		tagRepo,
+		descriptionRepo,
+	)
 }
