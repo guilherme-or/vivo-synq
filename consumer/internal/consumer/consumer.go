@@ -1,6 +1,8 @@
 package consumer
 
 import (
+	"time"
+
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/handler"
 )
@@ -8,7 +10,7 @@ import (
 type AutoOffsetReset string
 
 const (
-	AOROldest   AutoOffsetReset = "oldest"
+	AORLatest   AutoOffsetReset = "latest"
 	AOREarliest AutoOffsetReset = "earliest"
 	AORNone     AutoOffsetReset = "none"
 )
@@ -33,6 +35,20 @@ func New(server, groupID string, autoOffsetReset AutoOffsetReset) (*KafkaConsume
 
 func (c *KafkaConsumer) Read(handler *handler.KafkaMessageHandler) {
 	for {
+		msg, err := c.ReadMessage(-1)
+
+		if err != nil {
+			handler.OnFail(msg, err)
+			continue
+		}
+
+		handler.OnMessage(msg)
+	}
+}
+
+func (c *KafkaConsumer) ReadTimeout(handler *handler.KafkaMessageHandler, t time.Duration) {
+	end := time.Now().Add(t)
+	for time.Now().Before(end) {
 		msg, err := c.ReadMessage(-1)
 
 		if err != nil {

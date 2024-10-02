@@ -12,9 +12,11 @@ import (
 )
 
 func main() {
-	// Carregar as variáveis de ambiente
-	if err := godotenv.Load(".env"); err != nil {
-		panic(err)
+	if os.Getenv("SERVER_ADDR") == "" {
+		// Carregar as variáveis de ambiente
+		if err := godotenv.Load(".env"); err != nil {
+			panic(err)
+		}
 	}
 
 	// Carregar as conexões com o banco de dados

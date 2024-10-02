@@ -1,4 +1,4 @@
-package repository
+package infra
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
+	"github.com/guilherme-or/vivo-synq/consumer/internal/repository"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -23,7 +24,7 @@ type MixedProductRepository struct {
 	ctx     context.Context
 }
 
-func NewMixedProductRepository(sqlConn *database.PostgreSQLConn, noSqlConn *database.MongoDBConn) ProductRepository {
+func NewMixedProductRepository(sqlConn *database.PostgreSQLConn, noSqlConn *database.MongoDBConn) repository.ProductRepository {
 	sqlDB := sqlConn.GetDatabase()
 	noSqlClient := noSqlConn.GetClient().(*mongo.Client)
 	noSqlDB := noSqlClient.Database(DatabaseName)
@@ -62,8 +63,8 @@ func (r *MixedProductRepository) tryCompleteProduct(incomplete *entity.Product) 
 	return &product
 }
 
-func (r *MixedProductRepository) Insert(p *entity.Product) error {
-	complete := r.tryCompleteProduct(p)
+func (r *MixedProductRepository) Insert(after *entity.Product) error {
+	complete := r.tryCompleteProduct(after)
 	coll := r.noSqlDB.Collection(UserProductsCollection)
 
 	res, err := coll.InsertOne(
@@ -82,11 +83,11 @@ func (r *MixedProductRepository) Insert(p *entity.Product) error {
 	return nil
 }
 
-func (r *MixedProductRepository) Update(id int, p *entity.Product) error {
-	complete := r.tryCompleteProduct(p)
+func (r *MixedProductRepository) Update(before, after *entity.Product) error {
+	complete := r.tryCompleteProduct(before)
 	coll := r.noSqlDB.Collection(UserProductsCollection)
 
-	res, err := coll.ReplaceOne(r.ctx, bson.M{"id": id}, complete)
+	res, err := coll.ReplaceOne(r.ctx, bson.M{"id": before.ID}, complete)
 
 	if err != nil {
 		return err
@@ -99,10 +100,10 @@ func (r *MixedProductRepository) Update(id int, p *entity.Product) error {
 	return nil
 }
 
-func (r *MixedProductRepository) Delete(id int, productType string) error {
+func (r *MixedProductRepository) Delete(before *entity.Product) error {
 	coll := r.noSqlDB.Collection(UserProductsCollection)
 
-	res, err := coll.DeleteOne(r.ctx, bson.M{"id": id, "product_type": productType})
+	res, err := coll.DeleteOne(r.ctx, bson.M{"id": before.ID, "product_type": before.ProductType})
 	if err != nil {
 		return err
 	}

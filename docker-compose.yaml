@@ -10,6 +10,7 @@ services:
       - 5432:5432
     volumes:
       - ./database/mock_dump.sql:/docker-entrypoint-initdb.d/mock_dump.sql
+      - ./database/mock_dump_insert.sql:/tmp/mock_dump_insert.sql
       - ./database/mock_dump_test.sql:/tmp/mock_dump_test.sql
 
   zookeeper:
@@ -71,6 +72,42 @@ services:
       - redis-cache
     networks:
       - vivo-synq_network
+
+  # consumer:
+  #   container_name: vivo-synq_consumer
+  #   build:
+  #     context: ./consumer
+  #     dockerfile: Dockerfile
+  #   env_file:
+  #     - ./env/consumer.env
+  #   networks:
+  #     - vivo-synq_network
+  #   depends_on:
+  #     - postgres-mock
+  #     - zookeeper
+  #     - kafka
+  #     - connector
+  #     - redis-cache
+  #     - redis-exporter
+
+  api:
+    container_name: vivo-synq_api
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./env/api.env
+    networks:
+      - vivo-synq_network
+    depends_on:
+      - postgres-mock
+      - zookeeper
+      - kafka
+      - connector
+      - redis-cache
+      - redis-exporter
 
 networks:
   vivo-synq_network:
