@@ -48,14 +48,14 @@ func (m *MongoDBProductRepository) Insert(after *entity.Product) error {
 	after.SubProducts = make([]entity.Product, 0)
 
 	// Insert on parent product
-	// if after.ParentProductID != nil && *after.ParentProductID > 0 {
-	// 	var parent entity.Product
-	// 	if err := coll.FindOne(*m.ctx, bson.M{"id": after.ParentProductID}).Decode(&parent); err != nil {
-	// 		return err
-	// 	}
-	// 	parent.SubProducts = append(parent.SubProducts, *after)
-	// 	coll.ReplaceOne(*m.ctx, bson.M{"id": after.ParentProductID}, parent)
-	// }
+	if after.ParentProductID != nil && *after.ParentProductID > 0 {
+		var parent entity.Product
+		if err := coll.FindOne(*m.ctx, bson.M{"id": after.ParentProductID}).Decode(&parent); err != nil {
+			return err
+		}
+		parent.SubProducts = append(parent.SubProducts, *after)
+		coll.ReplaceOne(*m.ctx, bson.M{"id": after.ParentProductID}, parent)
+	}
 
 	res, err := coll.InsertOne(
 		*m.ctx,
@@ -91,19 +91,19 @@ func (m *MongoDBProductRepository) Update(before, after *entity.Product) error {
 	after.SubProducts = p.SubProducts
 
 	// Update on parent product
-	// if after.ParentProductID != nil && *after.ParentProductID > 0 {
-	// 	var parent entity.Product
-	// 	if err := coll.FindOne(*m.ctx, bson.M{"id": after.ParentProductID}).Decode(&parent); err != nil {
-	// 		return err
-	// 	}
-	// 	for i, sub := range parent.SubProducts {
-	// 		if sub.ID == before.ID {
-	// 			parent.SubProducts[i] = *after
-	// 			break
-	// 		}
-	// 	}
-	// 	coll.ReplaceOne(*m.ctx, bson.M{"id": after.ParentProductID}, parent)
-	// }
+	if after.ParentProductID != nil && *after.ParentProductID > 0 {
+		var parent entity.Product
+		if err := coll.FindOne(*m.ctx, bson.M{"id": after.ParentProductID}).Decode(&parent); err != nil {
+			return err
+		}
+		for i, sub := range parent.SubProducts {
+			if sub.ID == before.ID {
+				parent.SubProducts[i] = *after
+				break
+			}
+		}
+		coll.ReplaceOne(*m.ctx, bson.M{"id": after.ParentProductID}, parent)
+	}
 
 	res, err := coll.ReplaceOne(*m.ctx, bson.M{"id": before.ID}, after)
 
@@ -122,20 +122,20 @@ func (m *MongoDBProductRepository) Delete(before *entity.Product) error {
 	coll := m.db.Collection(UserProductsCollection)
 
 	// Delete on parent product
-	// if before.ParentProductID != nil && *before.ParentProductID > 0 {
-	// 	var parent entity.Product
-	// 	if err := coll.FindOne(*m.ctx, bson.M{"id": before.ParentProductID}).Decode(&parent); err != nil {
-	// 		return err
-	// 	}
-	// 	newSubProducts := make([]entity.Product, 0)
-	// 	for _, sub := range parent.SubProducts {
-	// 		if sub.ID != before.ID {
-	// 			newSubProducts = append(newSubProducts, sub)
-	// 		}
-	// 	}
-	// 	parent.SubProducts = newSubProducts
-	// 	coll.ReplaceOne(*m.ctx, bson.M{"id": before.ParentProductID}, parent)
-	// }
+	if before.ParentProductID != nil && *before.ParentProductID > 0 {
+		var parent entity.Product
+		if err := coll.FindOne(*m.ctx, bson.M{"id": before.ParentProductID}).Decode(&parent); err != nil {
+			return err
+		}
+		newSubProducts := make([]entity.Product, 0)
+		for _, sub := range parent.SubProducts {
+			if sub.ID != before.ID {
+				newSubProducts = append(newSubProducts, sub)
+			}
+		}
+		parent.SubProducts = newSubProducts
+		coll.ReplaceOne(*m.ctx, bson.M{"id": before.ParentProductID}, parent)
+	}
 
 	res, err := coll.DeleteOne(*m.ctx, bson.M{"id": before.ID})
 	if err != nil {
