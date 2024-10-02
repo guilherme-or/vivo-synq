@@ -3,7 +3,6 @@ package infra
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
@@ -30,7 +29,6 @@ func NewMongoDBPriceRepository(conn *database.MongoDBConn) repository.PriceRepos
 }
 
 func (m *MongoDBPriceRepository) Insert(after *entity.Price) error {
-	fmt.Println("Inserting price: ", after.ID, after.Amount, after.Description, after.ProductID, after.RecurringPeriod, after.Type)
 	coll := m.db.Collection(UserProductsCollection)
 
 	var p entity.Product

@@ -6,5 +6,5 @@ type Price struct {
 	Description     string  `json:"description" bson:"description"`
 	Type            string  `json:"type" bson:"type"`
 	RecurringPeriod string  `json:"recurring_period" bson:"recurring_period"`
-	Amount          string `json:"amount" bson:"amount"`
+	Amount          float64 `json:"amount" bson:"amount"`
 }

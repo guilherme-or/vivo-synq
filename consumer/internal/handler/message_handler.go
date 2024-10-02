@@ -199,7 +199,6 @@ func (h *KafkaMessageHandler) cdcPrices(before, after *entity.Price) {
 		}
 	} else if after != nil && before == nil { // Insert
 		fmt.Printf("INSERT %s", PricesTableName)
-		fmt.Println("Sending to insert price: ", after.ID, after.Amount, after.Description, after.ProductID, after.RecurringPeriod, after.Type)
 		if err := h.priceRepo.Insert(after); err != nil {
 			fmt.Printf("...ERROR: %v\n", err)
 			return
