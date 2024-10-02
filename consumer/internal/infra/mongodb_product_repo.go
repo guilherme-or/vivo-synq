@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/guilherme-or/vivo-synq/consumer/internal/database"
 	"github.com/guilherme-or/vivo-synq/consumer/internal/entity"
@@ -38,14 +39,43 @@ func NewMongoDBProductRepository(conn *database.MongoDBConn) repository.ProductR
 	}
 }
 
-func (m *MongoDBProductRepository) Insert(after *entity.Product) error {
-	coll := m.db.Collection(UserProductsCollection)
+func (m *MongoDBProductRepository) dtoToEntity(dto *entity.ProductDTO) *entity.Product {
+	if dto == nil {
+		return nil
+	}
 
-	after.Descriptions = make([]entity.Description, 0)
-	after.Identifiers = make([]string, 0)
-	after.Tags = make([]string, 0)
-	after.Prices = make([]entity.Price, 0)
-	after.SubProducts = make([]entity.Product, 0)
+	var startDate time.Time
+	var endDate *time.Time
+
+	startDate = time.Unix(dto.StartDate/1000000, (dto.StartDate%1000000)*1000000)
+	if dto.EndDate <= 0 {
+		endDate = nil
+	} else {
+		e := time.Unix(dto.EndDate/1000000, (dto.EndDate%1000000)*1000000)
+		endDate = &e
+	}
+
+	return &entity.Product{
+		ID:               dto.ID,
+		Status:           dto.Status,
+		ProductName:      dto.ProductName,
+		ProductType:      dto.ProductType,
+		SubscriptionType: dto.SubscriptionType,
+		StartDate:        startDate,
+		EndDate:          endDate,
+		UserID:           dto.UserID,
+		ParentProductID:  dto.ParentProductID,
+		Descriptions:     make([]entity.Description, 0),
+		Identifiers:      make([]string, 0),
+		Tags:             make([]string, 0),
+		Prices:           make([]entity.Price, 0),
+		SubProducts:      make([]entity.Product, 0),
+	}
+}
+
+func (m *MongoDBProductRepository) Insert(afterDTO *entity.ProductDTO) error {
+	after := m.dtoToEntity(afterDTO)
+	coll := m.db.Collection(UserProductsCollection)
 
 	// Insert on parent product
 	if after.ParentProductID != nil && *after.ParentProductID > 0 {
@@ -73,7 +103,10 @@ func (m *MongoDBProductRepository) Insert(after *entity.Product) error {
 	return nil
 }
 
-func (m *MongoDBProductRepository) Update(before, after *entity.Product) error {
+func (m *MongoDBProductRepository) Update(beforeDTO, afterDTO *entity.ProductDTO) error {
+	before := m.dtoToEntity(beforeDTO)
+	after := m.dtoToEntity(afterDTO)
+
 	if before.ID != after.ID {
 		return errors.New("product id must be the same (tag update)")
 	}
@@ -118,7 +151,8 @@ func (m *MongoDBProductRepository) Update(before, after *entity.Product) error {
 	return nil
 }
 
-func (m *MongoDBProductRepository) Delete(before *entity.Product) error {
+func (m *MongoDBProductRepository) Delete(beforeDTO *entity.ProductDTO) error {
+	before := m.dtoToEntity(beforeDTO)
 	coll := m.db.Collection(UserProductsCollection)
 
 	// Delete on parent product

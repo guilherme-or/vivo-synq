@@ -96,8 +96,8 @@ func (h *KafkaMessageHandler) OnFail(msg *kafka.Message, err error) {
 func (h *KafkaMessageHandler) processCDC(table TableName, after, before []byte) {
 	switch table {
 	case ProductsTableName:
-		var afterProduct *entity.Product
-		var beforeProduct *entity.Product
+		var afterProduct *entity.ProductDTO
+		var beforeProduct *entity.ProductDTO
 		if err := json.Unmarshal(after, &afterProduct); err != nil {
 			fmt.Printf("Error unmarshalling %s after: %v\n", ProductsTableName, err)
 			return
@@ -160,7 +160,7 @@ func (h *KafkaMessageHandler) processCDC(table TableName, after, before []byte) 
 	}
 }
 
-func (h *KafkaMessageHandler) cdcProducts(before, after *entity.Product) {
+func (h *KafkaMessageHandler) cdcProducts(before, after *entity.ProductDTO) {
 	if after == nil && before == nil { // Invalid ID value
 		fmt.Print("Invalid ID")
 		return
