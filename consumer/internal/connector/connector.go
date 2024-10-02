@@ -26,13 +26,13 @@ func New(toURL, connectorName, connectorPath string) Connector {
 }
 
 func (c *DebeziumConnector) Register() error {
-	gr, err := http.Get(c.URL + "/" + c.Name)
+	res, err := http.Get(c.URL + "/" + c.Name)
 	if err != nil {
 		return err
 	}
-	defer gr.Body.Close()
+	defer res.Body.Close()
 
-	if gr.StatusCode == http.StatusOK {
+	if res.StatusCode == http.StatusOK {
 		return nil
 	}
 
@@ -41,14 +41,14 @@ func (c *DebeziumConnector) Register() error {
 		return err
 	}
 
-	pr, err := http.Post(c.URL, "application/json", bytes.NewBuffer(plan))
+	res, err = http.Post(c.URL, "application/json", bytes.NewBuffer(plan))
 	if err != nil {
 		return err
 	}
-	defer pr.Body.Close()
+	defer res.Body.Close()
 
-	if pr.StatusCode != http.StatusCreated {
-		return errors.New("failed to register connector - " + http.StatusText(pr.StatusCode))
+	if res.StatusCode != http.StatusCreated {
+		return errors.New("failed to register connector - " + http.StatusText(res.StatusCode))
 	}
 
 	return nil
