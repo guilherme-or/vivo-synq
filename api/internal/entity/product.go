@@ -5,6 +5,7 @@ import "time"
 // Product representa um produto contratado pelo usuário
 // Esse produto é preparado para a resposta da API
 type Product struct {
+	OID              string         `json:"oid,omitempty" bson:"_id"`
 	ID               int            `json:"id" bson:"id"`
 	Status           string         `json:"status" bson:"status"`
 	ProductName      string         `json:"product_name" bson:"product_name"`
@@ -22,6 +23,7 @@ type Product struct {
 }
 
 type ProductDTO struct {
+	OID              string            `json:"oid,omitempty" bson:"_id"`
 	ID               int               `json:"id" bson:"id"`
 	Status           string            `json:"status" bson:"status"`
 	ProductName      string            `json:"product_name" bson:"product_name"`
