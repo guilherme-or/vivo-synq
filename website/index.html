@@ -1,0 +1,183 @@
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>STRIX Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Bitter", serif;
+      }
+      .icon-size {
+        width: 64px;
+        height: 64px;
+      }
+      .bg-custom {
+        background-image: url("./assets/banner.png");
+        background-size: cover;
+        background-position: center;
+      }
+    </style>
+    <script>
+      function toggleDropdown() {
+        document.getElementById("dropdown").classList.toggle("hidden");
+      }
+    </script>
+  </head>
+  <body class="bg-white text-gray-800">
+    <header
+      class="flex items-center justify-between p-4 border-b border-gray-200 h-16"
+    >
+      <div class="flex items-center">
+        <a href="./index.html">
+          <!-- Wrap the logo in an anchor tag -->
+          <img
+            alt="STRIX logo"
+            class="h-14"
+            height="60"
+            src="./assets/strix.png"
+            width="auto"
+          />
+        </a>
+      </div>
+      <div class="relative">
+        <button class="focus:outline-none" onclick="toggleDropdown()">
+          <i class="fas fa-bars text-2xl"> </i>
+        </button>
+        <div
+          class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg hidden"
+          id="dropdown"
+        >
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./index.html"
+          >
+            Início
+          </a>
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./asis.html"
+          >
+            Arquitetura Vivo
+          </a>
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./componentes.html"
+          >
+            Arquitetura VivoSynq
+          </a>
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./perguntas.html"
+          >
+            Q&A
+          </a>
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./integrantes.html"
+          >
+            Equipe
+          </a>
+        </div>
+      </div>
+    </header>
+    <main>
+      <section class="bg-custom text-white text-center py-16 px-4">
+        <h1 class="text-2xl font-bold">
+          Olá, esse é o portal do grupo STRIX para o Vivo FastData Challenge
+        </h1>
+      </section>
+      <section class="bg-purple-700 text-white text-center py-4">
+        <h2 class="text-xl font-bold">Desafios</h2>
+      </section>
+      <section class="bg-purple-900 py-8 px-4">
+        <div class="bg-white text-gray-900 rounded-lg shadow-md p-4 mb-4">
+          <h3 class="text-lg font-bold">Consistência</h3>
+          <p class="mt-2">
+            Os dados precisam estar disponíveis para consumo com 100% de
+            garantia de integridade. Um único registro que tenha sido perdido
+            pode impedir do usuário acessar o canal para sempre ou levar
+            aplicações clientes desses dados a atuarem de maneira equivocada.
+          </p>
+        </div>
+        <div class="bg-white text-gray-900 rounded-lg shadow-md p-4 mb-4">
+          <h3 class="text-lg font-bold">Latência</h3>
+          <p class="mt-2">
+            Se a solução for baseada em réplica de dados, precisamos garantir
+            que ela ocorra <i>near-real-time</i> (quase em tempo real). Foi
+            considerado um tempo limite de 15 minutos para esse Caso de Uso.
+          </p>
+        </div>
+        <div class="bg-white text-gray-900 rounded-lg shadow-md p-4 mb-4">
+          <h3 class="text-lg font-bold">Resiliência</h3>
+          <p class="mt-2">
+            O consumo dos dados canônicos tem que ocorrer mesmo no caso dos
+            sistemas legados não estarem respondendo. É esperado que quando o
+            sistema retorne, haja uma ressincronização dos dados atualizados no
+            período.
+          </p>
+        </div>
+        <div class="bg-white text-gray-900 rounded-lg shadow-md p-4 mb-4">
+          <h3 class="text-lg font-bold">Evolução</h3>
+          <p class="mt-2">
+            Deve-se considerar na solução o impacto da evolução das regras de
+            negócio dos sistemas origens. Idealmente não devemos replicar regras
+            de negócios para qualquer camada de transformação externa ao sistema
+            legado original.
+          </p>
+        </div>
+      </section>
+      <section class="bg-custom text-white text-center py-6 px-4">
+        <div class="bg-white text-gray-900 rounded-lg shadow-md p-4 mb-4">
+          <h3 class="text-lg font-bold">Links úteis</h3>
+          <ul class="mt-2 space-y-2">
+            <li>
+              <a
+                class="text-gray-700 hover:text-gray-900"
+                href="https://drive.google.com/file/d/1307gwE5-zwkV4eI8Rmtf4EdXXMsroeYc/view?usp=sharing"
+                target="_blank"
+                >Diagrama de arquitetura</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-gray-700 hover:text-gray-900"
+                href="https://www.canva.com/design/DAGTT0i6uz8/Uek5krY27b8RRhw5XI1MIA/view?utm_content=DAGTT0i6uz8&utm_campaign=designshare&utm_medium=link&utm_source=editor"
+                target="_blank"
+                >Apresentação Canva</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-gray-700 hover:text-gray-900"
+                href="https://www.youtube.com/watch?v=xhqTwjL-9QY"
+                target="_blank"
+                >Vídeo de demonstração</a
+              >
+            </li>
+            <li>
+              <a
+                class="text-gray-700 hover:text-gray-900"
+                href="https://github.com/guilherme-or/vivo-synq"
+                target="_blank"
+                >Repositório GitHub</a
+              >
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

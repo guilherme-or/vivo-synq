@@ -1,0 +1,308 @@
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Componentes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Bitter", serif;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.9);
+        justify-content: center;
+        align-items: center;
+      }
+      .modal-content {
+        margin: auto;
+        display: block;
+        max-width: 90%;
+        max-height: 90%;
+      }
+      .modal-content,
+      #caption {
+        animation-name: zoom;
+        animation-duration: 0.6s;
+      }
+      @keyframes zoom {
+        from {
+          transform: scale(0);
+        }
+        to {
+          transform: scale(1);
+        }
+      }
+      .close {
+        position: absolute;
+        top: 15px;
+        right: 35px;
+        color: #f1f1f1;
+        font-size: 40px;
+        font-weight: bold;
+        transition: 0.3s;
+      }
+      .close:hover,
+      .close:focus {
+        color: #bbb;
+        text-decoration: none;
+        cursor: pointer;
+      }
+    </style>
+    <script>
+      function toggleDropdown() {
+        document.getElementById("dropdown").classList.toggle("hidden");
+      }
+      function openModal() {
+        document.getElementById("myModal").style.display = "flex";
+      }
+      function closeModal() {
+        document.getElementById("myModal").style.display = "none";
+      }
+    </script>
+  </head>
+  <body class="bg-white text-gray-800">
+    <header
+      class="flex items-center justify-between p-4 border-b border-gray-200 h-16"
+    >
+      <div class="flex items-center">
+        <a href="./index.html">
+          <!-- Wrap the logo in an anchor tag -->
+          <img
+            alt="STRIX logo"
+            class="h-14"
+            height="60"
+            src="./assets/strix.png"
+            width="auto"
+          />
+        </a>
+      </div>
+      <div class="relative">
+        <button class="focus:outline-none" onclick="toggleDropdown()">
+          <i class="fas fa-bars text-2xl"> </i>
+        </button>
+        <div
+          class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg hidden"
+          id="dropdown"
+        >
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./index.html"
+          >
+            Início
+          </a>
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./asis.html"
+          >
+            Arquitetura Vivo
+          </a>
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./componentes.html"
+          >
+            Arquitetura VivoSynq
+          </a>
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./perguntas.html"
+          >
+            Q&A
+          </a>
+          <a
+            class="block px-4 py-2 text-gray-800 hover:bg-gray-100"
+            href="./integrantes.html"
+          >
+            Equipe
+          </a>
+        </div>
+      </div>
+    </header>
+    <main class="p-4">
+      <h1 class="text-3xl font-bold mb-4">Componentes da Arquitetura VivoSynq</h1>
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">Cache de Requições</h2>
+        <div class="flex items-center mb-2">
+          <img alt="Logo do NGINX" class="h-6 mr-2" src="./assets/nginx.png" />
+          <span class="text-sm font-bold"> NGINX </span>
+        </div>
+        <p class="text-gray-600">
+          O Balance Loader/Cache de requisições irá gerenciar a demanda de
+          requisições em cada container, e armazena um cache das respostas para
+          aliviar o peso dos containers.
+        </p>
+      </section>
+      <hr class="border-gray-200 mb-6" />
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">API RESTful</h2>
+        <div class="flex items-center mb-2">
+          <img alt="Logo do Go" class="h-6 mr-2" src="./assets/go.png" />
+          <span class="text-sm font-bold"> GO </span>
+        </div>
+        <p class="text-gray-600">
+          API RESTful que apresentará os dados recuperados do cliente. Os dados
+          serão buscados do Banco de dados de CACHE ou do Banco de dados
+          Integrado MongoDB.
+        </p>
+      </section>
+      <hr class="border-gray-200 mb-6" />
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">Cache de Dados Recentes</h2>
+        <div class="flex items-center mb-2">
+          <img alt="Logo do Redis" class="h-6 mr-2" src="./assets/redis.png" />
+          <span class="text-sm font-bold"> Redis </span>
+        </div>
+        <p class="text-gray-600">
+          Servidor dedicado para armazenar o CACHE dos produtos do cliente com
+          15 (quinze) minutos de tolerância.
+        </p>
+      </section>
+      <hr class="border-gray-200 mb-6" />
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">Base de Dados Integrada</h2>
+        <div class="flex items-center mb-2">
+          <img
+            alt="Logo do MongoDB"
+            class="h-6 mr-2"
+            src="./assets/mongo.png"
+          />
+          <span class="text-sm font-bold"> MongoDB </span>
+        </div>
+        <p class="text-gray-600">
+          Servidor dedicado para armazenar os dados dos produtos do cliente.
+        </p>
+      </section>
+      <hr class="border-gray-200 mb-6" />
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">Dashboard de Monitoramento</h2>
+        <div class="flex items-center mb-2">
+          <img
+            alt="Logo do Grafana"
+            class="h-6 mr-2"
+            src="./assets/grafana.png"
+          />
+          <img
+            alt="Logo do Prometheus"
+            class="h-6 mr-2"
+            src="./assets/prometheus.png"
+          />
+          <span class="text-sm font-bold"> Grafana/Prometheus </span>
+        </div>
+        <p class="text-gray-600">
+          Visualização de Dashboard para monitoramento da saúde da arquitetura.
+          Esse container que consultará o banco de dados integrado para obtenção
+          de status sobre rede, dados e componentes.
+        </p>
+      </section>
+      <hr class="border-gray-200 mb-6" />
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">
+          Consumidor da Fila de Requisições
+        </h2>
+        <div class="flex items-center mb-2">
+          <img alt="Logo do Go" class="h-6 mr-2" src="./assets/go.png" />
+          <span class="text-sm font-bold">
+            Go - confluentic/confluent-kafka-go
+          </span>
+        </div>
+        <p class="text-gray-600">
+          Consumidor de filas do Apache Kafka. Recebe os dados alterados das
+          bases da Vivo e reflete as alterações no domínio de produtos.
+        </p>
+      </section>
+      <hr class="border-gray-200 mb-6" />
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">
+          Fila de Atualizações das Bases Legadas
+        </h2>
+        <div class="flex items-center mb-2">
+          <img
+            alt="Logo do Kafka"
+            class="h-6 mr-2"
+            src="./assets/kafka.png"
+            width="auto"
+          />
+          <img
+            alt="Logo do Zookeeper"
+            class="h-6 mr-2"
+            height="50"
+            src="./assets/zookeeper.png"
+            width="auto"
+          />
+          <span class="text-sm font-bold"> Kafka/Zookeeper </span>
+        </div>
+        <p class="text-gray-600">
+          Fila de atualizações das bases legadas da Vivo. Recebe as alterações
+          do conector (Debezium) e disponibiliza os dados para serem consumidos.
+        </p>
+      </section>
+      <hr class="border-gray-200 mb-6" />
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">
+          Leitor de Mudanças das Bases Legadas
+        </h2>
+        <div class="flex items-center mb-2">
+          <img
+            alt="Logo do Debezium"
+            class="h-6 mr-2"
+            src="./assets/debezium.png"
+            width="auto"
+          />
+          <span class="text-sm font-bold"> Debezium </span>
+        </div>
+        <p class="text-gray-600">
+          Conector para banco de dados Debezium. Lê as atualizações do banco de
+          dados e as insere na fila do Apache Kafka.
+        </p>
+      </section>
+      <hr class="border-gray-200 mb-6" />
+      <section class="mb-6">
+        <h2 class="text-xl font-bold mb-2">Diagrama da VivoSynq</h2>
+        <img
+          alt="Diagrama da VivoSynq"
+          class="cursor-pointer"
+          height="300"
+          onclick="openModal()"
+          src="./assets/VivoSynqArq.png"
+          width="600"
+        />
+      </section>
+    </main>
+    <!-- The Modal -->
+    <div class="modal" id="myModal">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <img
+        alt="Imagem ampliada do componente"
+        class="modal-content"
+        id="img01"
+      />
+    </div>
+    <script>
+      document.querySelectorAll("img").forEach((img) => {
+        img.addEventListener("click", function () {
+          document.getElementById("img01").src = this.src;
+          openModal();
+        });
+      });
+    </script>
+  </body>
+</html>
